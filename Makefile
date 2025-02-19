@@ -166,9 +166,8 @@ am__define_uniq_tagged_files = \
     if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
   done | $(am__uniquify_input)`
 DIST_SUBDIRS = $(SUBDIRS)
-am__DIST_COMMON = $(srcdir)/Makefile.in AUTHORS.md COPYING ChangeLog \
-	INSTALL.md NEWS README.md ar-lib compile config.guess \
-	config.sub install-sh missing
+am__DIST_COMMON = $(srcdir)/Makefile.in ar-lib compile config.guess \
+	config.sub depcomp install-sh missing
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -215,13 +214,13 @@ am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
 distcleancheck_listfiles = \
   find . \( -type f -a \! \
             \( -name .nfs* -o -name .smb* -o -name .__afs* \) \) -print
-ACLOCAL = ${SHELL} '/home/sguzman/ngircd/missing' aclocal-1.17
+ACLOCAL = ${SHELL} '/home/sguzman/ft_irc/missing' aclocal-1.17
 AMTAR = $${TAR-tar}
 AM_DEFAULT_VERBOSITY = 0
 AR = ar
-AUTOCONF = ${SHELL} '/home/sguzman/ngircd/missing' autoconf
-AUTOHEADER = ${SHELL} '/home/sguzman/ngircd/missing' autoheader
-AUTOMAKE = ${SHELL} '/home/sguzman/ngircd/missing' automake-1.17
+AUTOCONF = ${SHELL} '/home/sguzman/ft_irc/missing' autoconf
+AUTOHEADER = ${SHELL} '/home/sguzman/ft_irc/missing' autoheader
+AUTOMAKE = ${SHELL} '/home/sguzman/ft_irc/missing' automake-1.17
 AWK = gawk
 CC = gcc
 CCDEPMODE = depmode=gcc3
@@ -249,7 +248,7 @@ LIBOBJS =
 LIBS = -lz 
 LN_S = ln -s
 LTLIBOBJS = 
-MAKEINFO = ${SHELL} '/home/sguzman/ngircd/missing' makeinfo
+MAKEINFO = ${SHELL} '/home/sguzman/ft_irc/missing' makeinfo
 MKDIR_P = /usr/bin/mkdir -p
 OBJEXT = o
 OPENSSL_CFLAGS = 
@@ -270,10 +269,10 @@ SET_MAKE =
 SHELL = /bin/bash
 STRIP = 
 VERSION = 27~6-g512af135
-abs_builddir = /home/sguzman/ngircd
-abs_srcdir = /home/sguzman/ngircd
-abs_top_builddir = /home/sguzman/ngircd
-abs_top_srcdir = /home/sguzman/ngircd
+abs_builddir = /home/sguzman/ft_irc
+abs_srcdir = /home/sguzman/ft_irc
+abs_top_builddir = /home/sguzman/ft_irc
+abs_top_srcdir = /home/sguzman/ft_irc
 ac_ct_AR = ar
 ac_ct_CC = gcc
 am__include = include
@@ -303,7 +302,7 @@ host_vendor = pc
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /home/sguzman/ngircd/install-sh
+install_sh = ${SHELL} /home/sguzman/ft_irc/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
