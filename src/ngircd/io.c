@@ -44,30 +44,11 @@ typedef struct {
 #define IO_ERROR		4
 #define MAX_EVENTS		100
 
-#ifdef HAVE_EPOLL_CREATE
-#  define IO_USE_EPOLL		1
-#  ifdef HAVE_SELECT
-#    define IO_USE_SELECT	1
-#  endif
-#else
-#  ifdef HAVE_KQUEUE
-#    define IO_USE_KQUEUE	1
-#  else
-#    ifdef HAVE_SYS_DEVPOLL_H
-#      define IO_USE_DEVPOLL	1
-#    else
-#      if defined(HAVE_POLL) && defined(HAVE_POLL_H)
+# if defined(HAVE_POLL) && defined(HAVE_POLL_H)
 #        define IO_USE_POLL	1
 #      else
-#        ifdef HAVE_SELECT
-#          define IO_USE_SELECT	1
-#        else
 #          error "no IO API available!?"
-#        endif /* HAVE_SELECT */
 #      endif /* HAVE_POLL */
-#    endif /* HAVE_SYS_DEVPOLL_H */
-#  endif /* HAVE_KQUEUE */
-#endif /* HAVE_EPOLL_CREATE */
 
 static bool library_initialized = false;
 
