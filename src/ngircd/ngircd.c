@@ -74,7 +74,7 @@ GLOBAL int
 main(int argc, const char *argv[])
 {
 	bool ok, configtest = false;
-	bool NGIRCd_NoDaemon = false, NGIRCd_NoSyslog = false;
+	bool NGIRCd_NoDaemon = true, NGIRCd_NoSyslog = true;
 	int i;
 	size_t n;
 
