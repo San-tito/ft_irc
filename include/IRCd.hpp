@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/03 16:00:29 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/03 16:14:34 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@ class IRCd
 	void Run(void);
 
   private:
+	unsigned short port_;
 	static sig_atomic_t lastsignal_;
 	void ParseOptions(int argc, char **argv);
 };
