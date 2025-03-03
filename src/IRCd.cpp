@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/03 16:15:55 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/03 16:29:35 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@ IRCd::IRCd(int argc, char **argv)
 
 IRCd::~IRCd(void)
 {
+	std::cout << "bro me destrui\n";
 }
 
 void IRCd::Run(void)
@@ -44,12 +45,23 @@ static unsigned short	port_parse(char *arg)
 	return (port16);
 }
 
+static std::string pwd_parse(std::string arg)
+{
+	if (arg.length() >= PASS_LEN)
+	{
+		std::cerr << "password too long!\n";
+		std::exit(2);
+	}
+	return (arg);
+}
+
 void IRCd::ParseOptions(int argc, char **argv)
 {
-	if (argc != 2)
+	if (argc != 3)
 	{
 		std::cerr << "no broda\n";
 		std::exit(2);
 	}
 	port_ = port_parse(argv[1]);
+	password_ = pwd_parse(argv[2]);
 }
