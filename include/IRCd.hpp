@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/03 16:24:07 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/04 16:39:36 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,21 @@
 # include <sstream>
 # include <string>
 
-# define PASS_LEN 65
-
 class IRCd
 {
   public:
 	IRCd(int argc, char **argv);
 	~IRCd(void);
 	void Run(void);
+	void Exit(int status);
 
   private:
-	std::string password_;
-	unsigned short port_;
-	static sig_atomic_t lastsignal_;
+	unsigned short ParsePort(char *arg);
 	void ParseOptions(int argc, char **argv);
+
+	unsigned short port_;
+	std::string password_;
+	static sig_atomic_t lastsignal_;
 };
 
 #endif /* IRCD_HPP */

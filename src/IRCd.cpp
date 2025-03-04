@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/03 16:29:35 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/04 16:43:44 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,47 +21,41 @@ IRCd::IRCd(int argc, char **argv)
 
 IRCd::~IRCd(void)
 {
-	std::cout << "bro me destrui\n";
+	std::cout << "Destructor called\n";
 }
 
 void IRCd::Run(void)
 {
 }
 
-static unsigned short	port_parse(char *arg)
+void IRCd::Exit(int status)
 {
-	int				port;
-	unsigned short	port16;
-	char			*endptr;
+	delete (this);
+	std::exit(status);
+}
 
-	port = strtol(arg, &endptr, 10);
+unsigned short IRCd::ParsePort(char *arg)
+{
+	char	*endptr;
+
+	int port(strtol(arg, &endptr, 10));
 	if (port > 0 && port < 0xFFFF && *endptr == '\0')
-		port16 = port;
+		return (static_cast<unsigned short>(port));
 	else
 	{
 		std::cerr << "illegal port number " << arg << "!\n";
-		std::exit(2);
+		Exit(EXIT_FAILURE);
 	}
-	return (port16);
-}
-
-static std::string pwd_parse(std::string arg)
-{
-	if (arg.length() >= PASS_LEN)
-	{
-		std::cerr << "password too long!\n";
-		std::exit(2);
-	}
-	return (arg);
+	return (EXIT_FAILURE);
 }
 
 void IRCd::ParseOptions(int argc, char **argv)
 {
 	if (argc != 3)
 	{
-		std::cerr << "no broda\n";
-		std::exit(2);
+		std::cerr << "Usage: " << argv[0] << " <port> <password>\n";
+		Exit(EXIT_FAILURE);
 	}
-	port_ = port_parse(argv[1]);
-	password_ = pwd_parse(argv[2]);
+	port_ = ParsePort(argv[1]);
+	password_ = argv[2];
 }
