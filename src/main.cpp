@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/04 16:42:53 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/04 16:48:30 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,5 +16,6 @@ int	main(int argc, char **argv)
 {
 	IRCd *server(new IRCd(argc, argv));
 	server->Run();
+	delete (server);
 	return (EXIT_SUCCESS);
 }

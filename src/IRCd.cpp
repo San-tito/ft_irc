@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/04 16:43:44 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/04 16:48:02 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ unsigned short IRCd::ParsePort(char *arg)
 		std::cerr << "illegal port number " << arg << "!\n";
 		Exit(EXIT_FAILURE);
 	}
-	return (EXIT_FAILURE);
+	return (0);
 }
 
 void IRCd::ParseOptions(int argc, char **argv)
