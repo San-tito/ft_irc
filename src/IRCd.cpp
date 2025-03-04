@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/04 16:48:02 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/04 17:22:00 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@ sig_atomic_t IRCd::lastsignal_(0);
 IRCd::IRCd(int argc, char **argv)
 {
 	ParseOptions(argc, argv);
+	IoLibraryInit(CONNECTION_POOL);
 }
 
 IRCd::~IRCd(void)
@@ -58,4 +59,15 @@ void IRCd::ParseOptions(int argc, char **argv)
 	}
 	port_ = ParsePort(argv[1]);
 	password_ = argv[2];
+}
+
+void IRCd::IoLibraryInit(unsigned int eventsize)
+{
+	pollfds_.resize(eventsize);
+	poll_maxfd_ = 0;
+	std::cerr << "IO subsystem: poll (initial maxfd " << eventsize << ").\n";
+	for (unsigned int i = 0; i < eventsize; ++i)
+	{
+		pollfds_[i].fd = -1;
+	}
 }
