@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/04 17:22:00 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/05 10:44:49 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@ IRCd::IRCd(int argc, char **argv)
 {
 	ParseOptions(argc, argv);
 	IoLibraryInit(CONNECTION_POOL);
+	InitListener(port_, LISTEN_ADDR);
 }
 
 IRCd::~IRCd(void)
@@ -70,4 +71,25 @@ void IRCd::IoLibraryInit(unsigned int eventsize)
 	{
 		pollfds_[i].fd = -1;
 	}
+}
+
+void IRCd::InitListener(unsigned short port, const char *listen_addr)
+{
+	ipaddr_t	addr;
+
+	int sock, af;
+	addr->sin4.sin_family = AF_INET;
+	af = addr->sin4.sin_family;
+	sock = socket(af, SOCK_STREAM, 0);
+	if (sock < 0)
+	{
+		std::cerr << "Can't create socket (af " << af << ") : " << strerror(errno) << "!\n";
+		Exit(EXIT_FAILURE);
+	}
+	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
+	{
+		std::cerr << "Can't enable non-blocking mode for socket: " << strerror(errno) << "!\n";
+		Exit(EXIT_FAILURE);
+	}
+	std::cerr << "Listening on " << addr << ":" << port << ".\n";
 }

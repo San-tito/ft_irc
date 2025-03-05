@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/04 17:14:56 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/05 10:49:10 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,12 +15,16 @@
 
 # include <algorithm>
 # include <csignal>
+# include <cstdlib>
 # include <iostream>
+# include <netinet/in.h>
 # include <poll.h>
 # include <sstream>
 # include <string>
+# include <sys/socket.h>
 # include <vector>
 
+# define LISTEN_ADDR "0.0.0.0"
 # define CONNECTION_POOL 100
 
 class IRCd
@@ -35,6 +39,7 @@ class IRCd
 	unsigned short ParsePort(char *arg);
 	void ParseOptions(int argc, char **argv);
 	void IoLibraryInit(unsigned int eventsize);
+	void InitListener(unsigned short port, const char *listen_addr);
 
 	unsigned short port_;
 	std::string password_;
