@@ -88,9 +88,9 @@ main(int argc, const char *argv[])
 
 	NGIRCd_SignalQuit = NGIRCd_SignalRestart = false;
 	NGIRCd_Passive = false;
-	NGIRCd_Debug = false;
+	NGIRCd_Debug = true;
 #ifdef SNIFFER
-	NGIRCd_Sniffer = false;
+	NGIRCd_Sniffer = true;
 #endif
 
 	Fill_Version();
