@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/05 10:44:49 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/05 14:35:28 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,14 +16,21 @@ sig_atomic_t IRCd::lastsignal_(0);
 
 IRCd::IRCd(int argc, char **argv)
 {
-	ParseOptions(argc, argv);
+	if (argc != 3)
+	{
+		std::cerr << "Usage: " << argv[0] << " <port> <password>\n";
+		Exit(EXIT_FAILURE);
+	}
+	this->port_ = ParsePort(argv[1]);
+	this->password_ = argv[2];
 	IoLibraryInit(CONNECTION_POOL);
-	InitListener(port_, LISTEN_ADDR);
+	this->socket_ = InitListener(this->port_, LISTEN_ADDR);
 }
 
 IRCd::~IRCd(void)
 {
-	std::cout << "Destructor called\n";
+	close(this->socket_);
+	std::cout << "Listening socket " << this->socket_ << " closed.\n";
 }
 
 void IRCd::Run(void)
@@ -51,17 +58,6 @@ unsigned short IRCd::ParsePort(char *arg)
 	return (0);
 }
 
-void IRCd::ParseOptions(int argc, char **argv)
-{
-	if (argc != 3)
-	{
-		std::cerr << "Usage: " << argv[0] << " <port> <password>\n";
-		Exit(EXIT_FAILURE);
-	}
-	port_ = ParsePort(argv[1]);
-	password_ = argv[2];
-}
-
 void IRCd::IoLibraryInit(unsigned int eventsize)
 {
 	pollfds_.resize(eventsize);
@@ -73,14 +69,20 @@ void IRCd::IoLibraryInit(unsigned int eventsize)
 	}
 }
 
-void IRCd::InitListener(unsigned short port, const char *listen_addr)
+int IRCd::InitListener(unsigned short port, const char *listen_addr)
 {
-	ipaddr_t	addr;
+	struct sockaddr_in	addr;
 
-	int sock, af;
-	addr->sin4.sin_family = AF_INET;
-	af = addr->sin4.sin_family;
-	sock = socket(af, SOCK_STREAM, 0);
+	bzero(&addr, sizeof(addr));
+	addr.sin_family = AF_INET;
+	if (inet_aton(listen_addr, &addr.sin_addr) == 0)
+	{
+		std::cerr << "Can't listen on [" << listen_addr << "]:" << port << ": Failed to parse IP address!\n";
+		Exit(EXIT_FAILURE);
+	}
+	addr.sin_port = htons(port);
+	int af(addr.sin_family);
+	int sock(socket(af, SOCK_STREAM, 0));
 	if (sock < 0)
 	{
 		std::cerr << "Can't create socket (af " << af << ") : " << strerror(errno) << "!\n";
@@ -91,5 +93,20 @@ void IRCd::InitListener(unsigned short port, const char *listen_addr)
 		std::cerr << "Can't enable non-blocking mode for socket: " << strerror(errno) << "!\n";
 		Exit(EXIT_FAILURE);
 	}
-	std::cerr << "Listening on " << addr << ":" << port << ".\n";
+	if (bind(sock, reinterpret_cast<struct sockaddr *>(&addr),
+			sizeof(addr)) != 0)
+	{
+		std::cerr << "Can't bind socket to address " << listen_addr << ':';
+		std::cerr << port << " - " << strerror(errno) << " !\n";
+		close(sock);
+		Exit(EXIT_FAILURE);
+	}
+	if (listen(sock, 10) != 0)
+	{
+		std::cerr << "Can't listen on socket: " << strerror(errno) << "!\n";
+		close(sock);
+		Exit(EXIT_FAILURE);
+	}
+	std::cout << "Now listening on [" << listen_addr << "]:" << port << " (socket " << sock << ").\n";
+	return (sock);
 }

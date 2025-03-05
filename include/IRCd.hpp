@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/05 10:49:10 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/05 14:32:02 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,12 @@
 # define IRCD_HPP
 
 # include <algorithm>
+# include <arpa/inet.h>
+# include <cerrno>
 # include <csignal>
 # include <cstdlib>
+# include <cstring>
+# include <fcntl.h>
 # include <iostream>
 # include <netinet/in.h>
 # include <poll.h>
@@ -37,10 +41,10 @@ class IRCd
 
   private:
 	unsigned short ParsePort(char *arg);
-	void ParseOptions(int argc, char **argv);
 	void IoLibraryInit(unsigned int eventsize);
-	void InitListener(unsigned short port, const char *listen_addr);
+	int InitListener(unsigned short port, const char *listen_addr);
 
+	int socket_;
 	unsigned short port_;
 	std::string password_;
 
