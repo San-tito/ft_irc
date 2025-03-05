@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/05 14:35:28 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/05 14:59:02 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,11 @@ IRCd::IRCd(int argc, char **argv)
 
 IRCd::~IRCd(void)
 {
-	close(this->socket_);
-	std::cout << "Listening socket " << this->socket_ << " closed.\n";
+	if (this->socket_ > 0)
+	{
+		close(this->socket_);
+		std::cout << "Listening socket " << this->socket_ << " closed.\n";
+	}
 }
 
 void IRCd::Run(void)
@@ -71,42 +74,10 @@ void IRCd::IoLibraryInit(unsigned int eventsize)
 
 int IRCd::InitListener(unsigned short port, const char *listen_addr)
 {
-	struct sockaddr_in	addr;
+	int	fd;
 
-	bzero(&addr, sizeof(addr));
-	addr.sin_family = AF_INET;
-	if (inet_aton(listen_addr, &addr.sin_addr) == 0)
-	{
-		std::cerr << "Can't listen on [" << listen_addr << "]:" << port << ": Failed to parse IP address!\n";
+	fd = Conn::NewListener(listen_addr, port);
+	if (fd < 0)
 		Exit(EXIT_FAILURE);
-	}
-	addr.sin_port = htons(port);
-	int af(addr.sin_family);
-	int sock(socket(af, SOCK_STREAM, 0));
-	if (sock < 0)
-	{
-		std::cerr << "Can't create socket (af " << af << ") : " << strerror(errno) << "!\n";
-		Exit(EXIT_FAILURE);
-	}
-	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
-	{
-		std::cerr << "Can't enable non-blocking mode for socket: " << strerror(errno) << "!\n";
-		Exit(EXIT_FAILURE);
-	}
-	if (bind(sock, reinterpret_cast<struct sockaddr *>(&addr),
-			sizeof(addr)) != 0)
-	{
-		std::cerr << "Can't bind socket to address " << listen_addr << ':';
-		std::cerr << port << " - " << strerror(errno) << " !\n";
-		close(sock);
-		Exit(EXIT_FAILURE);
-	}
-	if (listen(sock, 10) != 0)
-	{
-		std::cerr << "Can't listen on socket: " << strerror(errno) << "!\n";
-		close(sock);
-		Exit(EXIT_FAILURE);
-	}
-	std::cout << "Now listening on [" << listen_addr << "]:" << port << " (socket " << sock << ").\n";
-	return (sock);
+	return (fd);
 }
