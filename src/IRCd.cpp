@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 16:21:44 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 16:38:54 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,15 +64,4 @@ unsigned short IRCd::ParsePort(char *arg)
 		Exit(EXIT_FAILURE);
 	}
 	return (0);
-}
-
-void IRCd::IoLibraryInit(unsigned int eventsize)
-{
-	pollfds_.resize(eventsize);
-	poll_maxfd_ = 0;
-	std::cerr << "IO subsystem: poll (initial maxfd " << eventsize << ").\n";
-	for (unsigned int i = 0; i < eventsize; ++i)
-	{
-		pollfds_[i].fd = -1;
-	}
 }
