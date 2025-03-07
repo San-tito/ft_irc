@@ -6,13 +6,13 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 16:14:24 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 16:21:44 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IRCd.hpp"
 
-IRCd::IRCd(int argc, char **argv)
+IRCd::IRCd(int argc, char **argv) : socket_(-1)
 {
 	if (argc != 3)
 	{
@@ -21,14 +21,14 @@ IRCd::IRCd(int argc, char **argv)
 	}
 	this->port_ = ParsePort(argv[1]);
 	this->password_ = argv[2];
-	IoLibraryInit(CONNECTION_POOL);
+	Io::Init(CONNECTION_POOL);
 	Sig::Init();
-	this->socket_ = InitListener(this->port_, LISTEN_ADDR);
+	this->socket_ = Conn::NewListener(LISTEN_ADDR, this->port_);
 }
 
 IRCd::~IRCd(void)
 {
-	if (this->socket_ > 0)
+	if (this->socket_ >= 0)
 	{
 		close(this->socket_);
 		std::cout << "Listening socket " << this->socket_ << " closed.\n";
@@ -75,14 +75,4 @@ void IRCd::IoLibraryInit(unsigned int eventsize)
 	{
 		pollfds_[i].fd = -1;
 	}
-}
-
-int IRCd::InitListener(unsigned short port, const char *listen_addr)
-{
-	int	fd;
-
-	fd = Conn::NewListener(listen_addr, port);
-	if (fd < 0)
-		Exit(EXIT_FAILURE);
-	return (fd);
 }

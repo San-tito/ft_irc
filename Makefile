@@ -6,7 +6,7 @@
 #    By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/09 15:07:57 by sguzman           #+#    #+#              #
-#    Updated: 2025/03/07 16:08:41 by sguzman          ###   ########.fr        #
+#    Updated: 2025/03/07 16:30:32 by sguzman          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,7 @@ SRCS_PATH    = ./src
 OBJS_PATH    = ./build
 INCLUDE_PATH = ./include
 
-SRCS         = Conn.cpp IRCd.cpp Sig.cpp
+SRCS         = Conn.cpp Io.cpp IRCd.cpp Sig.cpp
 MAIN         = main.cpp
 
 ################################################################################

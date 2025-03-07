@@ -1,33 +1,31 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Conn.hpp                                           :+:      :+:    :+:   */
+/*   Io.hpp                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 16:25:09 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 16:32:19 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef CONN_HPP
-# define CONN_HPP
+#ifndef IO_HPP
+# define IO_HPP
 
-# include <arpa/inet.h>
-# include <cerrno>
-# include <cstdlib>
-# include <cstring>
-# include <fcntl.h>
 # include <iostream>
-# include <netinet/in.h>
 # include <poll.h>
-# include <sys/socket.h>
-# include <unistd.h>
+# include <string>
+# include <vector>
 
-class Conn
+class Io
 {
   public:
-	static int NewListener(const char *listen_addr, unsigned short port);
+	static void Init(unsigned int eventsize);
+
+  private:
+	static unsigned int poll_maxfd;
+	static std::vector<struct pollfd> pollfds;
 };
 
-#endif /* CONN_HPP */
+#endif /* IO_HPP */
