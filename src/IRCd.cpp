@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 16:38:54 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 17:02:05 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,8 @@ IRCd::IRCd(int argc, char **argv) : socket_(-1)
 	Io::Init(CONNECTION_POOL);
 	Sig::Init();
 	this->socket_ = Conn::NewListener(LISTEN_ADDR, this->port_);
+	if (this->socket_ < 0)
+		Exit(EXIT_FAILURE);
 }
 
 IRCd::~IRCd(void)
@@ -38,9 +40,19 @@ IRCd::~IRCd(void)
 
 void IRCd::Run(void)
 {
+	int				i;
+	struct timeval	tv;
+
 	while (!Sig::quit)
 	{
-		// tuqui
+		tv.tv_usec = 0;
+		tv.tv_sec = 1;
+		i = Io::Dispatch(&tv);
+		if (i == -1 && errno != EINTR)
+		{
+			std::cerr << "Io::Dispatch(): " << strerror(errno) << "\n";
+			Exit(EXIT_FAILURE);
+		}
 	}
 	std::cout << "Server going down NOW!\n";
 }
