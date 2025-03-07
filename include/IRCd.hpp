@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/05 14:56:45 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 16:12:53 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,19 +14,12 @@
 # define IRCD_HPP
 
 # include "Conn.hpp"
+# include "Sig.hpp"
 # include <algorithm>
 # include <arpa/inet.h>
-# include <cerrno>
-# include <csignal>
-# include <cstdlib>
-# include <cstring>
-# include <fcntl.h>
 # include <iostream>
-# include <netinet/in.h>
-# include <poll.h>
 # include <sstream>
 # include <string>
-# include <sys/socket.h>
 # include <vector>
 
 # define LISTEN_ADDR "0.0.0.0"
@@ -51,8 +44,6 @@ class IRCd
 
 	unsigned int poll_maxfd_;
 	std::vector<struct pollfd> pollfds_;
-
-	static sig_atomic_t lastsignal_;
 };
 
 #endif /* IRCD_HPP */

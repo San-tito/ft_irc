@@ -6,13 +6,11 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/05 14:59:02 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 16:14:24 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IRCd.hpp"
-
-sig_atomic_t IRCd::lastsignal_(0);
 
 IRCd::IRCd(int argc, char **argv)
 {
@@ -24,6 +22,7 @@ IRCd::IRCd(int argc, char **argv)
 	this->port_ = ParsePort(argv[1]);
 	this->password_ = argv[2];
 	IoLibraryInit(CONNECTION_POOL);
+	Sig::Init();
 	this->socket_ = InitListener(this->port_, LISTEN_ADDR);
 }
 
@@ -34,10 +33,16 @@ IRCd::~IRCd(void)
 		close(this->socket_);
 		std::cout << "Listening socket " << this->socket_ << " closed.\n";
 	}
+	Sig::Exit();
 }
 
 void IRCd::Run(void)
 {
+	while (!Sig::quit)
+	{
+		// tuqui
+	}
+	std::cout << "Server going down NOW!\n";
 }
 
 void IRCd::Exit(int status)
