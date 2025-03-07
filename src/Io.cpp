@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:57:02 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 18:42:08 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/08 00:02:43 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void Io::Init(unsigned int eventsize)
 {
 	pollfds.resize(eventsize);
 	poll_maxfd = eventsize;
-	std::cerr << "IO subsystem: poll (initial maxfd " << eventsize << ").\n";
+	Log::Info() << "IO subsystem: poll (initial maxfd " << eventsize << ").";
 	for (unsigned int i = 0; i < eventsize; ++i)
 		pollfds[i].fd = -1;
 }
@@ -48,7 +48,6 @@ int Io::Dispatch(struct timeval *tv)
 		if (what)
 		{
 			fds_ready--;
-			std::cout << "IO: dispatching event " << what << " on fd " << i << ".\n";
 		}
 		if (fds_ready <= 0)
 			break ;

@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 22:31:52 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/08 00:02:06 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,10 +15,10 @@
 
 # include "Conn.hpp"
 # include "Io.hpp"
+# include "Log.hpp"
 # include "Sig.hpp"
 # include <algorithm>
 # include <arpa/inet.h>
-# include <iostream>
 # include <sstream>
 # include <string>
 # include <vector>

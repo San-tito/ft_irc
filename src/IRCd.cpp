@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 17:02:05 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/08 00:11:15 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,12 @@ IRCd::IRCd(int argc, char **argv) : socket_(-1)
 {
 	if (argc != 3)
 	{
-		std::cerr << "Usage: " << argv[0] << " <port> <password>\n";
+		Log::Notice() << "Usage: " << argv[0] << " <port> <password>";
 		Exit(EXIT_FAILURE);
 	}
 	this->port_ = ParsePort(argv[1]);
 	this->password_ = argv[2];
+	Log::Info() << "IRCd starting ...";
 	Io::Init(CONNECTION_POOL);
 	Sig::Init();
 	this->socket_ = Conn::NewListener(LISTEN_ADDR, this->port_);
@@ -33,7 +34,7 @@ IRCd::~IRCd(void)
 	if (this->socket_ >= 0)
 	{
 		close(this->socket_);
-		std::cout << "Listening socket " << this->socket_ << " closed.\n";
+		Log::Info() << "Listening socket " << this->socket_ << " closed.\n";
 	}
 	Sig::Exit();
 }
@@ -50,11 +51,11 @@ void IRCd::Run(void)
 		i = Io::Dispatch(&tv);
 		if (i == -1 && errno != EINTR)
 		{
-			std::cerr << "Io::Dispatch(): " << strerror(errno) << "\n";
+			Log::Err() << "Io::Dispatch(): " << strerror(errno);
 			Exit(EXIT_FAILURE);
 		}
 	}
-	std::cout << "Server going down NOW!\n";
+	Log::Info() << "Server going down NOW!";
 }
 
 void IRCd::Exit(int status)
@@ -72,7 +73,7 @@ unsigned short IRCd::ParsePort(char *arg)
 		return (static_cast<unsigned short>(port));
 	else
 	{
-		std::cerr << "illegal port number " << arg << "!\n";
+		Log::Notice() << "illegal port number " << arg << '!';
 		Exit(EXIT_FAILURE);
 	}
 	return (0);

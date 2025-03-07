@@ -1,37 +1,61 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   Io.hpp                                             :+:      :+:    :+:   */
+/*   Log.hpp                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/08 00:02:55 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 23:55:41 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef IO_HPP
-# define IO_HPP
+#ifndef LOG_HPP
+# define LOG_HPP
 
-# include "Log.hpp"
-# include <poll.h>
-# include <string>
-# include <sys/time.h>
-# include <vector>
+# include <ctime>
+# include <iostream>
+# include <sstream>
 
-# define IO_WANTREAD 1
-# define IO_WANTWRITE 2
-# define IO_ERROR 4
-
-class Io
+class Log
 {
   public:
-	static void Init(unsigned int eventsize);
-	static int Dispatch(struct timeval *tv);
+	Log(void);
+	template <typename T> Log &operator<<(T const &value)
+	{
+		buffer_ << value;
+		return (*this);
+	}
+	virtual ~Log(void);
+
+	class Notice;
+	class Info;
+	class Err;
 
   private:
-	static int poll_maxfd;
-	static std::vector<struct pollfd> pollfds;
+	std::time_t start_time_;
+	std::ostringstream buffer_;
 };
 
-#endif /* IO_HPP */
+class Log::Notice : public Log
+{
+  public:
+	Notice(void);
+	~Notice(void);
+};
+
+class Log::Info : public Log
+{
+  public:
+	Info(void);
+	~Info(void);
+};
+
+class Log::Err : public Log
+{
+  public:
+	Err(void);
+	~Err(void);
+};
+
+#endif /* LOG_HPP */

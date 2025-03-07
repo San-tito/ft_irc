@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:57:02 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/05 15:43:10 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/08 00:09:51 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,35 +30,37 @@ int Conn::NewListener(const char *listen_addr, unsigned short port)
 
 	if (!InitAddr(&addr, listen_addr, port))
 	{
-		std::cerr << "Can't listen on [" << listen_addr << "]:" << port << ": Failed to parse IP address!\n";
+		Log::Err() << "Can't listen on [" << listen_addr << "]:" << port << ": Failed to parse IP address!";
 		return (-1);
 	}
 	int af(addr.sin_family);
 	int sock(socket(af, SOCK_STREAM, 0));
 	if (sock < 0)
 	{
-		std::cerr << "Can't create socket (af " << af << ") : " << strerror(errno) << "!\n";
+		Log::Err() << "Can't create socket (af " << af << ") : " << strerror(errno) << '!';
 		return (-1);
 	}
 	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
 	{
-		std::cerr << "Can't enable non-blocking mode for socket: " << strerror(errno) << "!\n";
+		Log::Err() << "Can't enable non-blocking mode for socket: " << strerror(errno) << '!';
 		return (-1);
 	}
 	if (bind(sock, reinterpret_cast<struct sockaddr *>(&addr),
 			sizeof(addr)) != 0)
 	{
-		std::cerr << "Can't bind socket to address " << listen_addr << ':';
-		std::cerr << port << " - " << strerror(errno) << " !\n";
+		std::ostringstream oss;
+		oss << "Can't bind socket to address " << listen_addr << ':';
+		oss << port << " - " << strerror(errno) << '!';
+		Log::Err() << oss.str();
 		close(sock);
 		return (-1);
 	}
 	if (listen(sock, 10) != 0)
 	{
-		std::cerr << "Can't listen on socket: " << strerror(errno) << "!\n";
+		Log::Err() << "Can't listen on socket: " << strerror(errno) << '!';
 		close(sock);
 		return (-1);
 	}
-	std::cout << "Now listening on [" << listen_addr << "]:" << port << " (socket " << sock << ").\n";
+	Log::Info() << "Now listening on [" << listen_addr << "]:" << port << " (socket " << sock << ").";
 	return (sock);
 }
