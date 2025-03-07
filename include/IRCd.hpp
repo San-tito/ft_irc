@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 16:30:13 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 22:31:52 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,15 +36,10 @@ class IRCd
 
   private:
 	unsigned short ParsePort(char *arg);
-	void IoLibraryInit(unsigned int eventsize);
-	int InitListener(unsigned short port, const char *listen_addr);
 
 	int socket_;
 	unsigned short port_;
 	std::string password_;
-
-	unsigned int poll_maxfd_;
-	std::vector<struct pollfd> pollfds_;
 };
 
 #endif /* IRCD_HPP */

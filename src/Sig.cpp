@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:57:02 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/07 16:14:58 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/07 22:34:06 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ bool Sig::quit(false);
 
 void Sig::SigHandler(int sig)
 {
-	static_cast<void>(sig);
+	std::cout << "Got signal \"" << strsignal(sig) << "\" ...\n";
 	quit = true;
 }
 
