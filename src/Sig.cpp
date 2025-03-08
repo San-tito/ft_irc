@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:57:02 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/08 00:03:15 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/08 12:25:51 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ bool Sig::quit(false);
 
 void Sig::SigHandler(int sig)
 {
-	Log::Info() << "Got signal \"" << strsignal(sig) << "\" ...\n";
+	Log::Info() << "Got signal \"" << strsignal(sig) << "\" ...";
 	quit = true;
 }
 
