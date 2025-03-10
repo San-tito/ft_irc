@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/08 00:01:57 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/10 21:03:55 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 class Conn
 {
   public:
+	static bool InitSocket(int sock);
 	static int NewListener(const char *listen_addr, unsigned short port);
 };
 

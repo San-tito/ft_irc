@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/05 14:57:02 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/08 00:09:51 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/10 21:13:04 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,32 @@ static bool	InitAddr(struct sockaddr_in *addr, const char *ip,
 	if (addr->sin_addr.s_addr == (unsigned)-1)
 		return (false);
 	addr->sin_port = htons(port);
+	return (true);
+}
+
+static bool	SetNonBlock(int fd)
+{
+	int	flags;
+
+	flags = fcntl(fd, F_GETFL);
+	if (flags == -1)
+		return (false);
+	flags |= O_NONBLOCK;
+	return (fcntl(fd, F_SETFL, flags) == 0);
+}
+
+bool Conn::InitSocket(int sock)
+{
+	if (!SetNonBlock(sock))
+	{
+		Log::Err() << "Can't enable non-blocking mode for socket: " << strerror(errno) << '!';
+		close(sock);
+		return (false);
+	}
+	int value(1);
+	if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &value,
+			static_cast<socklen_t>(sizeof(value))) != 0)
+		Log::Err() << "Can't set socket option SO_REUSEADDR: " << strerror(errno) << '!';
 	return (true);
 }
 
@@ -40,11 +66,8 @@ int Conn::NewListener(const char *listen_addr, unsigned short port)
 		Log::Err() << "Can't create socket (af " << af << ") : " << strerror(errno) << '!';
 		return (-1);
 	}
-	if (fcntl(sock, F_SETFL, fcntl(sock, F_GETFL) | O_NONBLOCK) < 0)
-	{
-		Log::Err() << "Can't enable non-blocking mode for socket: " << strerror(errno) << '!';
+	if (!InitSocket(sock))
 		return (-1);
-	}
 	if (bind(sock, reinterpret_cast<struct sockaddr *>(&addr),
 			sizeof(addr)) != 0)
 	{
