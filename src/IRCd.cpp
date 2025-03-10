@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/08 12:25:21 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/10 16:59:17 by rbarbier         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,11 +22,11 @@ IRCd::IRCd(int argc, char **argv) : socket_(-1)
 	this->port_ = ParsePort(argv[1]);
 	this->password_ = argv[2];
 	Log::Info() << "IRCd starting ...";
-	Io::Init(CONNECTION_POOL);
 	Sig::Init();
 	this->socket_ = Conn::NewListener(LISTEN_ADDR, this->port_);
 	if (this->socket_ < 0)
 		Exit(EXIT_FAILURE);
+	AddPoll(this->socket_);
 }
 
 IRCd::~IRCd(void)
@@ -39,20 +39,45 @@ IRCd::~IRCd(void)
 	Sig::Exit();
 }
 
+void IRCd::AddPoll(int fd)
+{
+	pollfd	poll;
+
+	poll.fd = fd;
+	poll.events = POLLIN | POLLPRI;
+	this->pollfds_.push_back(poll);
+}
+
+void IRCd::NewConnection(void)
+{
+	int client_socket(accept(this->socket_, 0, 0));
+	if (client_socket < 0)
+	{
+		Log::Err() << "Error en accept";
+		Exit(EXIT_FAILURE);
+	}
+	Log::Info() << "Nueva conexión aceptada: fd " << client_socket;
+	AddPoll(client_socket);
+}
+
 void IRCd::Run(void)
 {
-	int				i;
-	struct timeval	tv;
-
 	while (!Sig::quit)
 	{
-		tv.tv_usec = 0;
-		tv.tv_sec = 1;
-		i = Io::Dispatch(&tv);
-		if (i == -1 && errno != EINTR)
+		int ret(poll(pollfds_.data(), pollfds_.size(), -1));
+		if (ret < 0)
+			return ;
+		for (size_t i = 0; i < this->pollfds_.size(); i++)
 		{
-			Log::Err() << "Io::Dispatch(): " << strerror(errno);
-			Exit(EXIT_FAILURE);
+			if (pollfds_[i].revents & (POLLIN | POLLPRI))
+			{
+				if (pollfds_[i].fd == this->socket_)
+					NewConnection();
+				else
+				{
+					// clients[i].ReadRequest();
+				}
+			}
 		}
 	}
 	Log::Info() << "Server going down NOW!";
