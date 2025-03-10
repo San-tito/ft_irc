@@ -1,12 +1,14 @@
 #include "Client.hpp"
 
 Client::Client(int fd, struct sockaddr_in addr) : fd_(fd), addr_(addr),
-	nick_(""), user_(""), log_time_(time(NULL)), is_logged_(false)
+	nick_(""), user_(""), last_time_(time(NULL)), registered_(false)
 {
 }
 
 Client::~Client(void)
 {
+	// deberiamos poder hacer esto
+	// close(this->fd_);
 }
 
 int Client::getFd(void) const
@@ -14,7 +16,17 @@ int Client::getFd(void) const
 	return (this->fd_);
 }
 
-int Client::getTime(void) const
+time_t Client::getLastTime(void) const
 {
-	return (this->log_time_);
+	return (this->last_time_);
+}
+
+void Client::setLastTime(time_t last_time)
+{
+	this->last_time_ = last_time;
+}
+
+bool Client::isRegistered(void) const
+{
+	return (this->registered_);
 }

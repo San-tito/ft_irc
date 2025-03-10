@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/10 22:02:32 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/10 23:45:39 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 
 # define LISTEN_ADDR "0.0.0.0"
 # define READBUFFER_LEN 2048
+# define TIMEOUT 20
 
 class Server
 {

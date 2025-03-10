@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/10 22:05:11 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/11 00:02:39 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ void Server::CloseConnection(int fd)
 	{
 		if (pollfds_[i].fd == fd)
 		{
-			close(pollfds_[i].fd);
 			pollfds_.erase(pollfds_.begin() + i);
 			break ;
 		}
@@ -94,12 +93,20 @@ void Server::CloseConnection(int fd)
 
 void Server::TimeOutCheck(void)
 {
-	for (size_t j = 0; j < clients_.size(); j++)
+	time_t now(time(NULL));
+	for (size_t i = 0; i < clients_.size(); i++)
 	{
-		if (time(NULL) > clients_[j].getTime() + 5)
+		if (clients_[i].isRegistered())
 		{
-			Log::Info() << "Timeout: Client " << clients_[j].getFd() << " unregistered.";
-			CloseConnection(clients_[j].getFd());
+			// handle pings pongs
+		}
+		else
+		{
+			if (clients_[i].getLastTime() < now - TIMEOUT)
+			{
+				Log::Info() << "Unregistered connection " << clients_[i].getFd() << " timed out ...";
+				CloseConnection(clients_[i].getFd());
+			}
 		}
 	}
 }
@@ -164,8 +171,9 @@ void Server::ReadRequest(int sock)
 		CloseConnection(sock);
 		return ;
 	}
-	// aqui actualizar el timeout porque cada 
-	// Request que hace deberia actualizarlo
+	// if el cliente esta registrado
+	// t = time(NULL);
+	// clients_[i].setLastTime(t);
 	// Log::Info() << "Mensaje recibido de fd " << fd << ": " << buffer;
 	// // if (send(fd, buffer, bytes_read, 0) < 0)
 	// // 	Log::Err() << "Error en send: " << strerror(errno);
