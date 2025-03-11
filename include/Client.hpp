@@ -24,7 +24,7 @@ public:
   std::string getReadBuffer(void) const;
 
 private:
-  std::string buffer_;
+  std::string rbuffer_;
   pollfd poll_;
   std::string user_;
   time_t last_time_;
