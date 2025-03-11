@@ -1,23 +1,34 @@
 #include "Client.hpp"
 
-Client::Client(void) : fd_(-1), user_(""), last_time_(time(0)),
-	registered_(false)
+Client::Client(void) : user_(""), last_time_(time(0)), registered_(false)
 {
+	poll_.fd = -1;
+	poll_.events = 0;
+	poll_.revents = 0;
 }
 
 Client::~Client(void)
 {
-	close(this->fd_);
 }
 
 int Client::getFd(void) const
 {
-	return (this->fd_);
+	return (this->poll_.fd);
 }
 
 void Client::setFd(int fd)
 {
-	this->fd_ = fd;
+	this->poll_.fd = fd;
+}
+
+short Client::getEvents(void) const
+{
+	return (this->poll_.events);
+}
+
+void Client::setEvents(short events)
+{
+	this->poll_.events |= events;
 }
 
 time_t Client::getLastTime(void) const

@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/10 23:45:39 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/11 10:57:49 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@
 # include "Sig.hpp"
 # include <algorithm>
 # include <arpa/inet.h>
-# include <poll.h>
+# include <map>
 # include <sstream>
 # include <string>
 # include <sys/time.h>
@@ -36,10 +36,10 @@ class Server
 	~Server(void);
 	void Run(void);
 	void Exit(int status);
-	void NewConnection(void);
-	void AddEvent(int fd, short events);
+	void NewConnection(int sock);
 	int Dispatch(void);
 	void ReadRequest(int sock);
+	void HandleWrite(int sock);
 	void CloseConnection(int fd);
 	void TimeOutCheck(void);
 
@@ -49,7 +49,6 @@ class Server
 	int sock_;
 	unsigned short port_;
 	std::string password_;
-	std::vector<struct pollfd> pollfds_;
 	std::vector<Client> clients_;
 };
 

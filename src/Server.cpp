@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/11 06:18:54 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/11 10:57:38 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,10 @@ Server::Server(int argc, char **argv) : sock_(-1)
 	this->sock_ = Conn::NewListener(LISTEN_ADDR, this->port_);
 	if (this->sock_ < 0)
 		Exit(EXIT_FAILURE);
-	AddEvent(this->sock_, POLLIN | POLLPRI);
+	clients_.push_back(Client());
+	clients_.back().setFd(this->sock_);
+	clients_.back().setRegistered(true);
+	clients_.back().setEvents(POLLIN | POLLPRI);
 }
 
 Server::~Server(void)
@@ -39,25 +42,12 @@ Server::~Server(void)
 	Sig::Exit();
 }
 
-void Server::AddEvent(int fd, short events)
+void Server::NewConnection(int sock)
 {
-	pollfd	p;
-
-	p.events = events;
-	p.fd = fd;
-	this->pollfds_.push_back(p);
-}
-
-void Server::NewConnection(void)
-{
-	int					new_sock;
-	int					new_sock_len;
-	struct sockaddr_in	new_addr;
+	int	new_sock;
 
 	Log::Info() << "Accepting new connection on socket " << this->sock_ << "...";
-	new_sock = accept(this->sock_,
-			reinterpret_cast<struct sockaddr *>(&new_addr),
-			reinterpret_cast<socklen_t *>(&new_sock_len));
+	new_sock = accept(this->sock_, 0, 0);
 	if (new_sock < 0)
 	{
 		Log::Err() << "Can't accept connection on socket " << this->sock_ << ": " << strerror(errno) << '!';
@@ -65,27 +55,20 @@ void Server::NewConnection(void)
 	}
 	if (!Conn::InitSocket(new_sock))
 		return ;
-	AddEvent(new_sock, POLLIN | POLLPRI);
 	clients_.push_back(Client());
 	clients_.back().setFd(new_sock);
-	Log::Info() << "Accepted connection " << new_sock << " on socket " << this->sock_ << '.';
+	clients_.back().setEvents(POLLIN | POLLPRI);
+	Log::Info() << "Accepted connection " << new_sock << " on socket " << sock << '.';
 }
 
 void Server::CloseConnection(int fd)
 {
 	Log::Info() << "Shutting down connection " << fd << " ...";
-	for (size_t i = 0; i < this->pollfds_.size(); i++)
-	{
-		if (pollfds_[i].fd == fd)
-		{
-			pollfds_.erase(pollfds_.begin() + i);
-			break ;
-		}
-	}
 	for (size_t i = 0; i < this->clients_.size(); i++)
 	{
 		if (clients_[i].getFd() == fd)
 		{
+			close(fd);
 			clients_.erase(clients_.begin() + i);
 			break ;
 		}
@@ -132,30 +115,26 @@ void Server::Run(void)
 int Server::Dispatch(void)
 {
 	int ret, fds_ready;
-	ret = poll(this->pollfds_.data(), this->pollfds_.size(), 1000);
+	std::vector<struct pollfd> pollfds;
+	pollfds = reinterpret_cast<std::vector<struct pollfd> &>(clients_);
+	ret = poll(pollfds.data(), pollfds.size(), 1000);
 	if (ret <= 0)
 		return (ret);
 	fds_ready = ret;
-	for (size_t i(0); i < this->pollfds_.size(); ++i)
+	for (size_t i(0); i < pollfds.size(); ++i)
 	{
-		short flags(0);
-		pollfd p(pollfds_[i]);
-		if (p.revents & (POLLIN | POLLPRI))
-			flags = 1;
-		if (p.revents & POLLOUT)
-			flags |= 2;
-		if (flags)
+		if (pollfds[i].revents & (POLLIN | POLLPRI | POLLOUT))
 		{
 			fds_ready--;
-			if (flags & 1)
+			if (pollfds[i].revents & (POLLIN | POLLPRI))
 			{
-				if (p.fd == this->sock_)
-					NewConnection();
+				if (pollfds[i].fd == this->sock_)
+					NewConnection(this->sock_);
 				else
-					ReadRequest(p.fd);
+					ReadRequest(pollfds[i].fd);
 			}
-			if (flags & 2)
-				// HandleWrite(p.fd);
+			if (pollfds[i].revents & POLLOUT)
+				HandleWrite(pollfds[i].fd);
 		}
 		if (fds_ready <= 0)
 			break ;
@@ -182,12 +161,12 @@ void Server::ReadRequest(int sock)
 		CloseConnection(sock);
 		return ;
 	}
-	// if el cliente esta registrado
-	// t = time(NULL);
-	// clients_[i].setLastTime(t);
-	// Log::Info() << "Mensaje recibido de fd " << fd << ": " << buffer;
-	// // if (send(fd, buffer, bytes_read, 0) < 0)
-	// // 	Log::Err() << "Error en send: " << strerror(errno);
+	Log::Info() << "Received " << len << " bytes from connection " << sock << ": " << readbuf;
+}
+
+void Server::HandleWrite(int sock)
+{
+	static_cast<void>(sock);
 }
 
 void Server::Exit(int status)
