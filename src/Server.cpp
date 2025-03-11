@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/11 05:50:05 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/11 06:18:54 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -138,14 +138,24 @@ int Server::Dispatch(void)
 	fds_ready = ret;
 	for (size_t i(0); i < this->pollfds_.size(); ++i)
 	{
+		short flags(0);
 		pollfd p(pollfds_[i]);
 		if (p.revents & (POLLIN | POLLPRI))
+			flags = 1;
+		if (p.revents & POLLOUT)
+			flags |= 2;
+		if (flags)
 		{
 			fds_ready--;
-			if (p.fd == this->sock_)
-				NewConnection();
-			else
-				ReadRequest(p.fd);
+			if (flags & 1)
+			{
+				if (p.fd == this->sock_)
+					NewConnection();
+				else
+					ReadRequest(p.fd);
+			}
+			if (flags & 2)
+				// HandleWrite(p.fd);
 		}
 		if (fds_ready <= 0)
 			break ;
