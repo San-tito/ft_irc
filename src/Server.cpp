@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/11 00:02:39 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/11 05:50:05 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,8 @@ void Server::NewConnection(void)
 	if (!Conn::InitSocket(new_sock))
 		return ;
 	AddEvent(new_sock, POLLIN | POLLPRI);
-	clients_.push_back(Client(new_sock, new_addr));
+	clients_.push_back(Client());
+	clients_.back().setFd(new_sock);
 	Log::Info() << "Accepted connection " << new_sock << " on socket " << this->sock_ << '.';
 }
 
@@ -93,7 +94,7 @@ void Server::CloseConnection(int fd)
 
 void Server::TimeOutCheck(void)
 {
-	time_t now(time(NULL));
+	time_t now(time(0));
 	for (size_t i = 0; i < clients_.size(); i++)
 	{
 		if (clients_[i].isRegistered())
