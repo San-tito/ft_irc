@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/12 20:37:07 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/12 23:48:51 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ void Server::ProcessRequest(Client &client)
 	if ((pos = str.find('\n')) == std::string::npos)
 		return (client.unsetReadBuffer());
 	str = str.substr(0, pos);
-	if (str[pos - 1] == '\r')
+	if (pos > 0 && str[pos - 1] == '\r')
 		str = str.substr(0, pos - 1);
 	if (str.size() > COMMAND_LEN)
 	{
