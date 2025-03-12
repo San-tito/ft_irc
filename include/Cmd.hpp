@@ -10,6 +10,7 @@ class Cmd
 {
   private:
 	static void Join(int client_fd, std::vector<std::string> name);
+	static void Pass(int client_fd, std::vector<std::string> name);
 	// void	Nick(int client_fd, const std::string& name);
 	// void	PrivMsg(int client_fd, const std::string& name);
 	// void	User(int client_fd, const std::string& name);
