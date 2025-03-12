@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/11 16:11:25 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/12 18:15:23 by bautrodr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,12 @@
 # include <string>
 # include <sys/time.h>
 # include <vector>
+# include <cstring>
 
 # define LISTEN_ADDR "0.0.0.0"
 # define READBUFFER_LEN 2048
 # define TIMEOUT 20
+# define COMMAND_LEN 512
 
 class Server
 {
@@ -44,6 +46,7 @@ class Server
 	void TimeOutCheck(void);
 	int getClient(int fd);
 	void ProcessBuffers(void);
+	void ProcessRequest(Client &client);
 
   private:
 	unsigned short ParsePort(char *arg);

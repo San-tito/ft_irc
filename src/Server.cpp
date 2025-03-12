@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/11 16:11:11 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/12 18:22:38 by bautrodr         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,15 +84,37 @@ void Server::TimeOutCheck(void)
 	}
 }
 
+void Server::ProcessRequest(Client &client)
+{
+	size_t pos(0);
+	std::string str = client.getReadBuffer();
+	if ((pos = str.find('\n')) == std::string::npos)
+		return ;
+	str = str.substr(0, pos);
+	if (str[pos - 1] == '\r')
+		str = str.substr(0, pos - 1);
+	if (str.size() > COMMAND_LEN) {
+	  Log::Err() << "Request too long (connection "<< client.getFd() << "): " << str.size() << " bytes (max. "<< COMMAND_LEN << " expected)!";
+	  CloseConnection(client.getFd());
+	}
+	// tuqui parsear comandos bien picados
+	if (str == "hola")
+		client << "como andas";
+	if (str == "chau")
+	{
+		CloseConnection(client.getFd());
+	}
+	client.unsetReadBuffer();
+}
+
 void Server::ProcessBuffers()
 {
 	for (size_t i = 0; i < clients_.size(); i++)
 	{
-		Log::Info() << "Processing buffer for connection " << clients_[i].getFd() << " ...";
-		if (clients_[i].getReadBuffer().size() > 0)
-		{
-			Log::Info() << clients_[i].getReadBuffer();
-		}
+		if (!clients_[i].getReadBuffer().empty())
+			ProcessRequest(clients_[i]);
+		if (!clients_[i].getWriteBuffer().empty())
+			clients_[i].setEvents(POLLOUT);
 	}
 }
 
@@ -104,7 +126,7 @@ void Server::Run(void)
 	while (!Sig::quit)
 	{
 		TimeOutCheck();
-		// ProcessBuffers();
+		ProcessBuffers();
 		i = Dispatch();
 		if (i == -1 && errno != EINTR)
 		{
@@ -184,7 +206,11 @@ void Server::ReadRequest(int sock)
 
 void Server::HandleWrite(int sock)
 {
-	static_cast<void>(sock);
+	int i(getClient(sock));
+	write(sock, clients_[i].getWriteBuffer().c_str(),
+		clients_[i].getWriteBuffer().size());
+	clients_[i].unsetWriteBuffer();
+	clients_[i].unsetEvent(POLLOUT);
 }
 
 void Server::Exit(int status)

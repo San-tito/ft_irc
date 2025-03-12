@@ -16,9 +16,19 @@ std::string Client::getReadBuffer(void) const
 	return (this->rbuffer_);
 }
 
+std::string Client::getWriteBuffer(void) const
+{
+	return (this->wbuffer_);
+}
+
 void Client::setReadBuffer(std::string buffer)
 {
 	this->rbuffer_ = buffer;
+}
+
+void Client::setWriteBuffer(std::string buffer)
+{
+  this->wbuffer_ = buffer;
 }
 
 int Client::getFd(void) const
@@ -59,4 +69,19 @@ bool Client::isRegistered(void) const
 void Client::setRegistered(bool registered)
 {
 	this->registered_ = registered;
+}
+
+void Client::unsetEvent(short event)
+{
+	this->poll_.events &= ~event;
+}
+
+void Client::unsetReadBuffer(void)
+{
+	this->rbuffer_.clear();
+}
+
+void Client::unsetWriteBuffer(void)
+{
+	this->wbuffer_.clear();
 }
