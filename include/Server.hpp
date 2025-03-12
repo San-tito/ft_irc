@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/11 16:11:25 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/12 17:56:56 by deordone         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 # include "Client.hpp"
 # include "Conn.hpp"
+# include "Cmd.hpp"
 # include "Log.hpp"
 # include "Sig.hpp"
 # include <algorithm>
@@ -44,7 +45,7 @@ class Server
 	void TimeOutCheck(void);
 	int getClient(int fd);
 	void ProcessBuffers(void);
-
+	
   private:
 	unsigned short ParsePort(char *arg);
 
