@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/12 18:22:38 by bautrodr         ###   ########.fr       */
+/*   Updated: 2025/03/12 20:37:07 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,8 +60,9 @@ void Server::NewConnection(int sock)
 void Server::CloseConnection(int fd)
 {
 	Log::Info() << "Shutting down connection " << fd << " ...";
+	int i(getClient(fd));
 	close(fd);
-	clients_.erase(clients_.begin() + getClient(fd));
+	clients_.erase(clients_.begin() + i);
 }
 
 void Server::TimeOutCheck(void)
@@ -89,21 +90,17 @@ void Server::ProcessRequest(Client &client)
 	size_t pos(0);
 	std::string str = client.getReadBuffer();
 	if ((pos = str.find('\n')) == std::string::npos)
-		return ;
+		return (client.unsetReadBuffer());
 	str = str.substr(0, pos);
 	if (str[pos - 1] == '\r')
 		str = str.substr(0, pos - 1);
-	if (str.size() > COMMAND_LEN) {
-	  Log::Err() << "Request too long (connection "<< client.getFd() << "): " << str.size() << " bytes (max. "<< COMMAND_LEN << " expected)!";
-	  CloseConnection(client.getFd());
-	}
-	// tuqui parsear comandos bien picados
-	if (str == "hola")
-		client << "como andas";
-	if (str == "chau")
+	if (str.size() > COMMAND_LEN)
 	{
+		Log::Err() << "Request too long (connection " << client.getFd() << "): " << str.size() << " bytes (max. " << COMMAND_LEN << " expected)!";
 		CloseConnection(client.getFd());
+		return ;
 	}
+	// Parser::ParseRequest(client, str);
 	client.unsetReadBuffer();
 }
 
@@ -171,8 +168,7 @@ int Server::getClient(int fd)
 {
 	size_t	i;
 
-	i = 0;
-	for (; i < clients_.size(); i++)
+	for (i = 0; i < clients_.size(); i++)
 	{
 		if (clients_[i].getFd() == fd)
 			break ;
@@ -206,11 +202,19 @@ void Server::ReadRequest(int sock)
 
 void Server::HandleWrite(int sock)
 {
+	ssize_t len(0);
 	int i(getClient(sock));
-	write(sock, clients_[i].getWriteBuffer().c_str(),
-		clients_[i].getWriteBuffer().size());
-	clients_[i].unsetWriteBuffer();
+	len = write(sock, clients_[i].getWriteBuffer().c_str(),
+			clients_[i].getWriteBuffer().size());
 	clients_[i].unsetEvent(POLLOUT);
+	clients_[i].unsetWriteBuffer();
+	if (len < 0)
+	{
+		if (errno == EAGAIN || errno == EINTR)
+			return ;
+		Log::Err() << "Write error on connection " << sock << ": " << strerror(errno) << '!';
+		CloseConnection(sock);
+	}
 }
 
 void Server::Exit(int status)
