@@ -6,11 +6,14 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/13 13:17:14 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/13 23:38:43 by droied           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+std::string Server::password_ = "default";
+std::vector<Client> Server::clients_;
 
 Server::Server(int argc, char **argv) : sock_(-1)
 {
@@ -101,6 +104,16 @@ void Server::ProcessRequest(Client &client)
 		return ;
 	}
 	Log::Info() << "Received request from connection " << client.getFd() << ": " << str;
+
+	std::vector<std::string> param;
+	param.push_back("dei");
+
+	Cmd::Init();
+
+	Cmd::commands["PASS"](client, param);
+	Cmd::commands["NICK"](client, param);
+	Cmd::commands["USER"](client, param);
+
 	// Parser::ParseRequest(client, str);
 	client.unsetReadBuffer();
 }
@@ -179,6 +192,16 @@ int Server::getClient(int fd)
 			break ;
 	}
 	return (i);
+}
+
+std::string Server::getPassword(void)
+{
+	return(password_);
+}
+
+std::vector<Client>& Server::getClients(void)
+{
+	return(clients_);
 }
 
 void Server::ReadRequest(int sock)

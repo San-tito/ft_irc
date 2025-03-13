@@ -20,10 +20,13 @@ class Client
 	time_t getLastTime(void) const;
 	std::string getReadBuffer(void) const;
 	std::string getWriteBuffer(void) const;
+	std::string getNickname(void) const;
+	std::string getUser(void) const;
+	std::string getPassword(void) const;
 	template <typename T> Client &operator<<(T const &value)
 	{
 		std::ostringstream newbuffer;
-		newbuffer << wbuffer_ << value << '\n';
+		newbuffer << wbuffer_ << value; //bauti me dijo quita esto y luego me beso att deivid
 		wbuffer_ = newbuffer.str();
 		return (*this);
 	}
@@ -32,6 +35,9 @@ class Client
 	void setRegistered(bool registered);
 	void setReadBuffer(std::string buffer);
 	void setWriteBuffer(std::string buffer);
+	void setPassword(std::string password);
+	void setNickname(std::string nickname);
+	void setUser(std::string user);
 	void setEvents(short events);
 	void unsetEvent(short event);
 	void unsetReadBuffer(void);
@@ -42,6 +48,8 @@ class Client
 	std::string wbuffer_;
 	pollfd poll_;
 	std::string user_;
+	std::string nickname_;
+	std::string password_;
 	time_t last_time_;
 	bool registered_;
 };

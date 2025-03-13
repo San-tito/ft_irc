@@ -1,7 +1,9 @@
 #ifndef CMD_HPP
 #define CMD_HPP
 
+#include "Server.hpp"
 #include "Client.hpp"
+#include <string>
 #include <iostream>
 #include <map>
 #include <vector>
@@ -9,16 +11,13 @@
 class Cmd
 {
   private:
-	static void Join(int client_fd, std::vector<std::string> name);
-	static void Pass(int client_fd, std::vector<std::string> name);
-	// void	Nick(int client_fd, const std::string& name);
-	// void	PrivMsg(int client_fd, const std::string& name);
-	// void	User(int client_fd, const std::string& name);
+	static void Pass(Client& client, std::vector<std::string> params);
+	static void Nick(Client& client, std::vector<std::string> params);
+	static void User(Client& client, std::vector<std::string> params);
   public:
 	static void Init(void);
-	static std::map<std::string, void (*)(int,
+	static std::map<std::string, void (*)(Client&,
 		std::vector<std::string>)> commands;
 };
-
 
 #endif /* CMD_HPP */

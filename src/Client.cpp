@@ -31,6 +31,36 @@ void Client::setWriteBuffer(std::string buffer)
 	this->wbuffer_ = buffer;
 }
 
+void Client::setPassword(std::string password)
+{
+	this->password_ = password;
+}
+
+void Client::setNickname(std::string nickname)
+{
+	this->nickname_ = nickname;
+}
+
+void Client::setUser(std::string user)
+{
+	this->user_ = user;
+}
+
+std::string Client::getPassword(void) const
+{
+	return(this->password_);
+}
+
+std::string Client::getNickname(void) const
+{
+	return(this->nickname_);
+}
+
+std::string Client::getUser(void) const
+{
+	return(this->user_);
+}
+
 int Client::getFd(void) const
 {
 	return (this->poll_.fd);

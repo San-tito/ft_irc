@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/13 20:37:46 by droied           ###   ########.fr       */
+/*   Updated: 2025/03/13 21:35:19 by droied           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,14 +48,16 @@ class Server
 	int getClient(int fd);
 	void ProcessBuffers(void);
 	void ProcessRequest(Client &client);
+	static std::string getPassword(void);
+	static std::vector<Client>& getClients(void);
 
   private:
 	unsigned short ParsePort(char *arg);
 
 	int sock_;
 	unsigned short port_;
-	std::string password_;
-	std::vector<Client> clients_;
+	static std::string password_;
+	static std::vector<Client> clients_;
 };
 
 #endif /* IRCD_HPP */
