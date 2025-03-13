@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/13 13:12:31 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/13 13:17:14 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,7 +90,7 @@ void Server::ProcessRequest(Client &client)
 	size_t pos(0);
 	std::string str = client.getReadBuffer();
 	if ((pos = str.find('\n')) == std::string::npos)
-		return (client.unsetReadBuffer());
+		return ;
 	str = str.substr(0, pos);
 	if (pos > 0 && str[pos - 1] == '\r')
 		str = str.substr(0, pos - 1);
@@ -100,6 +100,7 @@ void Server::ProcessRequest(Client &client)
 		CloseConnection(client.getFd());
 		return ;
 	}
+	Log::Info() << "Received request from connection " << client.getFd() << ": " << str;
 	// Parser::ParseRequest(client, str);
 	client.unsetReadBuffer();
 }

@@ -23,12 +23,12 @@ std::string Client::getWriteBuffer(void) const
 
 void Client::setReadBuffer(std::string buffer)
 {
-	this->rbuffer_ = buffer;
+	this->rbuffer_ += buffer;
 }
 
 void Client::setWriteBuffer(std::string buffer)
 {
-  this->wbuffer_ = buffer;
+	this->wbuffer_ = buffer;
 }
 
 int Client::getFd(void) const
