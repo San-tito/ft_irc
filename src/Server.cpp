@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/13 11:30:11 by ncastell         ###   ########.fr       */
+/*   Updated: 2025/03/13 13:11:41 by ncastell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ Server::Server(int argc, char **argv) : sock_(-1)
 	this->password_ = argv[2];
 	Log::Info() << "Server starting ...";
 	Sig::Init();
+	 
 	this->sock_ = Conn::NewListener(LISTEN_ADDR, this->port_);
 	if (this->sock_ < 0)
 		Exit(EXIT_FAILURE);

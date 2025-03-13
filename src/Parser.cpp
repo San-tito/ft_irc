@@ -125,7 +125,5 @@ Parser::CommandType	Parser::getCommandType() const
 
 void	Parser::handleRequest(Client& client)
 {
-
-	Cmd::Init();
 	Cmd::commands[command_](client, params_);
 }
