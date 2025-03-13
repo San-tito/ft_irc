@@ -5,6 +5,9 @@
 #include <string>
 #include <cstring>
 #include <cstdlib>
+#include <vector>
+
+#include "Client.hpp"
 
 # define RED		"\x1b[31m"
 # define GREEN		"\x1b[32m"
@@ -14,13 +17,15 @@
 
 #define MAX_ARGS 10
 
+class Client;
+
 class	Parser
 {
 	private:
-		std::string			prefix_;
-		std::string			command_;
+		std::string					prefix_;
+		std::string					command_;
 		std::vector<std::string>	params_[MAX_ARGS];
-		int				n_params_;
+		int							n_params_;
 
 		enum	CommandType
 		{
@@ -35,7 +40,7 @@ class	Parser
 
 	public:
 		Parser();
-		static bool	Request(Client& client, const std::string& request);
+		static void	Request(Client& client, const std::string& request); // se llama cuando se envía un mensaje
 
 	private:
 		static void	trimString(std::string& str);

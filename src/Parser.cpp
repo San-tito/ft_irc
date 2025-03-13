@@ -1,28 +1,64 @@
 #include "Parser.hpp"
 
-bool	Request(Client& client, const std::string& request)
+void Request(Client& client, const std::string& request)
 {
-	if (client_ID < 0 || request.empty())
+	if (client.getFd() < 0 || request.empty())
 	{
-		std::cerr << RED"Error: invalid conection index or empty request."<< NC""<< std::endl;
-		return (false);
+		Log::Err() << "Error: invalid connection index or empty request.";
+		return;
 	}
 
-	IRCParser parser;
+	Parser parser;
 	if (!parser.parse(request))
-		return (false);
+	{
+		Log::Err() << "Error parsing request from client " << client.getFd();
+		return;
+	}
 
-	bool	closed = false;
-	/** VALIDACIONES:
-		no se hasta que punto esto iria aqui*/
-	if (!parser.validatePrefix(client_ID, closed) || !parser.validateCommand(client_ID, closed)
-		|| !parser.validateArgs(client_ID, closed))
-		return (!closed);
+	bool closed = false;
+	if (!parser.validatePrefix(client.getFd(), closed) ||
+		!parser.validateCommand(client.getFd(), closed) ||
+		!parser.validateArgs(client.getFd(), closed))
+	{
+		Log::Err() << "Request validation failed for client " << client.getFd();
+		return;
+	}
 
-	return (parser.handleRequest(client_ID));
+	parser.handleRequest(client.getFd());
 }
 
-bool	
 
+/**
+ * Método que analiza la solicitud IRC y extrae su estructura.
+ */
+bool	Parser::parse(const std::string& request)
+{
+	std::string	tempRequest = request;
+	trimString(tempRequest);
 
+	size_t spacePos = tempRequest.find(' ');
+	
+	if (tempRequest[0] == ':')
+	{
+		if (spacePos == std::string::npos)
+		{
+			std::cerr << YELLOW"WARNING: command without prefix." << std::endl;
+			return (false);
+		}
+		prefix_ = tempRequest.substr(1, spacePos - 1);
+		tempRequest = tempRequest.substr(spacePos + 1);
+	}
 
+	spacePos = tempRequest.find(' ');
+	if (spacePos != std::string::npos)
+	{
+		command_ = tempRequest.substr(0, spacePos);
+		tempRequest = tempRequest.substr(spacePos + 1);
+	} else {
+		command_ = tempRequest;
+		return (true);
+	}
+
+	parseArguments(tempRequest);
+	return (true);
+}
