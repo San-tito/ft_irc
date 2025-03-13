@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+         #
+#    By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/09 15:07:57 by sguzman           #+#    #+#              #
-#    Updated: 2025/03/12 17:20:35 by deordone         ###   ########.fr        #
+#    Updated: 2025/03/13 12:40:23 by ncastell         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,7 +31,7 @@ SRCS_PATH    = ./src
 OBJS_PATH    = ./build
 INCLUDE_PATH = ./include
 
-SRCS         = Conn.cpp Server.cpp Log.cpp Cmd.cpp Sig.cpp Client.cpp 
+SRCS         = Conn.cpp Server.cpp Log.cpp Cmd.cpp Sig.cpp Client.cpp Parser.cpp
 MAIN         = main.cpp
 
 ################################################################################
