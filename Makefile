@@ -6,7 +6,7 @@
 #    By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/09 15:07:57 by sguzman           #+#    #+#              #
-#    Updated: 2025/03/10 18:55:30 by rbarbier         ###   ########.fr        #
+#    Updated: 2025/03/13 12:24:40 by sguzman          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -78,10 +78,10 @@ all: banner $(NAME)
 banner:
 	@printf "%b" "$(GREEN)\n"
 	@echo
-	@echo "▗▄▄▄▖▗▄▄▖  ▗▄▄▖   ▐▌"
-	@echo "  █  ▐▌ ▐▌▐▌      ▐▌"
-	@echo "  █  ▐▛▀▚▖▐▌   ▗▞▀▜▌"
-	@echo "▗▄█▄▖▐▌ ▐▌▝▚▄▄▖▝▚▄▟▌"
+	@echo "▗▄▄▄▖▗▄▄▖  ▗▄▄▖"
+	@echo "  █  ▐▌ ▐▌▐▌   "
+	@echo "  █  ▐▛▀▚▖▐▌   "
+	@echo "▗▄█▄▖▐▌ ▐▌▝▚▄▄▖"
 	@echo
 	@printf "%b" "$(YELLOW)Name:           $(CYAN)$(NAME)\n$(RESET)"
 	@printf "%b" "$(YELLOW)CC:             $(CYAN)$(CC)\n$(RESET)"

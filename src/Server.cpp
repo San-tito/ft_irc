@@ -6,7 +6,7 @@
 /*   By: sguzman <sguzman@student.42barcelona.com>  +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/12 23:48:51 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/13 13:12:31 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,8 +137,12 @@ void Server::Run(void)
 int Server::Dispatch(void)
 {
 	int ret, fds_ready;
-	std::vector<struct pollfd> pollfds;
-	pollfds = reinterpret_cast<std::vector<struct pollfd> &>(clients_);
+	std::vector<struct pollfd> pollfds(clients_.size());
+	for (size_t i = 0; i < clients_.size(); ++i)
+	{
+		pollfds[i].fd = clients_[i].getFd();
+		pollfds[i].events = clients_[i].getEvents();
+	}
 	ret = poll(pollfds.data(), pollfds.size(), 1000);
 	if (ret <= 0)
 		return (ret);
