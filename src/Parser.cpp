@@ -18,7 +18,6 @@ void Parser::Request(Client& client, const std::string& request)
 
 	if (!parser.validateCommand())
 		return ;
-
 	parser.handleRequest(client);
 }
 
@@ -119,11 +118,12 @@ Parser::CommandType	Parser::getCommandType() const
 {
 	if (command_ == "PASS") return (CMD_PASS);
 	if (command_ == "JOIN") return (CMD_JOIN);
-	//if (command_ == "PRIVMSG") return (CMD_PRIVMSG);
+	// if (command_ == "PRIVMSG") return (CMD_PRIVMSG);
 	return (CMD_UNKNOWN);
 }
 
 void	Parser::handleRequest(Client& client)
 {
+	Cmd::Init();
 	Cmd::commands[command_](client, params_);
 }

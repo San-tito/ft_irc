@@ -33,7 +33,7 @@ class	Parser
 		{
 			CMD_PASS,
 			CMD_JOIN,
-			//CMD_PRIVMSG,
+			// CMD_PRIVMSG,
 			CMD_UNKNOWN
 		};
 

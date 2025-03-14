@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/13 13:11:41 by ncastell         ###   ########.fr       */
+/*   Updated: 2025/03/14 16:25:04 by ncastell         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,18 +71,11 @@ void Server::TimeOutCheck(void)
 	time_t now(time(0));
 	for (size_t i = 0; i < clients_.size(); i++)
 	{
-		if (clients_[i].isRegistered())
-		{
-			// handle pings pongs
-		}
-		else
-		{
-			if (clients_[i].getLastTime() < now - TIMEOUT)
+			if (!clients_[i].isRegistered() && clients_[i].getLastTime() < now - TIMEOUT)
 			{
 				Log::Info() << "Unregistered connection " << clients_[i].getFd() << " timed out ...";
 				CloseConnection(clients_[i].getFd());
 			}
-		}
 	}
 }
 
@@ -91,7 +84,7 @@ void Server::ProcessRequest(Client &client)
 	size_t pos(0);
 	std::string str = client.getReadBuffer();
 	if ((pos = str.find('\n')) == std::string::npos)
-		return (client.unsetReadBuffer());
+		return ;
 	str = str.substr(0, pos);
 	if (pos > 0 && str[pos - 1] == '\r')
 		str = str.substr(0, pos - 1);
@@ -101,6 +94,7 @@ void Server::ProcessRequest(Client &client)
 		CloseConnection(client.getFd());
 		return ;
 	}
+	Log::Info() << "Received request from connection " << client.getFd() << ": " << str;
 	// Parser::ParseRequest(client, str);
 	client.unsetReadBuffer();
 }
@@ -138,8 +132,12 @@ void Server::Run(void)
 int Server::Dispatch(void)
 {
 	int ret, fds_ready;
-	std::vector<struct pollfd> pollfds;
-	pollfds = reinterpret_cast<std::vector<struct pollfd> &>(clients_);
+	std::vector<struct pollfd> pollfds(clients_.size());
+	for (size_t i = 0; i < clients_.size(); ++i)
+	{
+		pollfds[i].fd = clients_[i].getFd();
+		pollfds[i].events = clients_[i].getEvents();
+	}
 	ret = poll(pollfds.data(), pollfds.size(), 1000);
 	if (ret <= 0)
 		return (ret);
