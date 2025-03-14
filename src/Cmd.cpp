@@ -1,6 +1,7 @@
 #include "Cmd.hpp"
 
-std::map<std::string, void (*)(Client&, std::vector<std::string>)> Cmd::commands;
+std::map<std::string, void (*)(Client &,
+	std::vector<std::string>)> Cmd::commands;
 
 void Cmd::Init(void)
 {
@@ -8,21 +9,36 @@ void Cmd::Init(void)
 	commands["PASS"] = Pass;
 }
 
-void Cmd::Join(Client& client, std::vector<std::string> params)
+bool Cmd::ValidateRegister(Client &client)
 {
-	typedef std::vector<std::string>::iterator iterator;
-	std::cout << "JOIN client[" << client.getFd() << "] y parametros: [";
-	for (iterator it(params.begin()); it != params.end(); it++)
-		std::cout << *it << ", ";
-	std::cout << "]\n";
+	if (!client.isRegistered())
+	{
+		client << client.getFd() << " :Connection not registered\n";
+		return (false);
+	}
+	return (true);
 }
 
-void Cmd::Pass(Client& client, std::vector<std::string> params)
+bool Cmd::ValidateParams(Client &client, int min, int max, int argc)
 {
-	
-	typedef std::vector<std::string>::iterator iterator;
-	std::cout << "En efecto yo soy el pass " << client.getFd() << " y tengo estos parametros:\n";
-	for (iterator it(params.begin()); it != params.end(); it++)
-		std::cout << *it << "\n";
-	std::cout << "\n";
+	if (argc < min || (max != -1 && argc > max))
+	{
+		client << client.getFd() << " :Syntax error\n";
+		return (false);
+	}
+	return (true);
+}
+
+void Cmd::Join(Client &client, std::vector<std::string> params)
+{
+	if (!ValidateRegister(client))
+		return ;
+	if (!ValidateParams(client, 1, 2, params.size()))
+		return ;
+}
+
+void Cmd::Pass(Client &client, std::vector<std::string> params)
+{
+	if (!ValidateParams(client, 0, -1, params.size()))
+		return ;
 }

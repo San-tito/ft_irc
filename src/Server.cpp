@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/14 16:25:04 by ncastell         ###   ########.fr       */
+/*   Updated: 2025/03/14 20:08:05 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,8 +22,8 @@ Server::Server(int argc, char **argv) : sock_(-1)
 	this->port_ = ParsePort(argv[1]);
 	this->password_ = argv[2];
 	Log::Info() << "Server starting ...";
+	Cmd::Init();
 	Sig::Init();
-	 
 	this->sock_ = Conn::NewListener(LISTEN_ADDR, this->port_);
 	if (this->sock_ < 0)
 		Exit(EXIT_FAILURE);
@@ -71,11 +71,12 @@ void Server::TimeOutCheck(void)
 	time_t now(time(0));
 	for (size_t i = 0; i < clients_.size(); i++)
 	{
-			if (!clients_[i].isRegistered() && clients_[i].getLastTime() < now - TIMEOUT)
-			{
-				Log::Info() << "Unregistered connection " << clients_[i].getFd() << " timed out ...";
-				CloseConnection(clients_[i].getFd());
-			}
+		if (!clients_[i].isRegistered() && clients_[i].getLastTime() < now
+			- TIMEOUT)
+		{
+			Log::Info() << "Unregistered connection " << clients_[i].getFd() << " timed out ...";
+			CloseConnection(clients_[i].getFd());
+		}
 	}
 }
 
@@ -94,8 +95,7 @@ void Server::ProcessRequest(Client &client)
 		CloseConnection(client.getFd());
 		return ;
 	}
-	Log::Info() << "Received request from connection " << client.getFd() << ": " << str;
-	// Parser::ParseRequest(client, str);
+	Parser().Request(client, str);
 	client.unsetReadBuffer();
 }
 
@@ -196,7 +196,6 @@ void Server::ReadRequest(int sock)
 	}
 	readbuf[len] = '\0';
 	clients_[getClient(sock)].setReadBuffer(readbuf);
-	Log::Info() << "Received " << len << " bytes from connection " << sock << ": " << readbuf;
 }
 
 void Server::HandleWrite(int sock)

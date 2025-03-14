@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/13 11:22:12 by ncastell         ###   ########.fr       */
+/*   Updated: 2025/03/14 18:07:21 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,18 +14,19 @@
 # define SERVER_HPP
 
 # include "Client.hpp"
-# include "Conn.hpp"
 # include "Cmd.hpp"
+# include "Conn.hpp"
 # include "Log.hpp"
+# include "Parser.hpp"
 # include "Sig.hpp"
 # include <algorithm>
 # include <arpa/inet.h>
+# include <cstring>
 # include <map>
 # include <sstream>
 # include <string>
 # include <sys/time.h>
 # include <vector>
-# include <cstring>
 
 # define LISTEN_ADDR "0.0.0.0"
 # define READBUFFER_LEN 2048

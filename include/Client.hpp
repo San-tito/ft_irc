@@ -23,7 +23,7 @@ class Client
 	template <typename T> Client &operator<<(T const &value)
 	{
 		std::ostringstream newbuffer;
-		newbuffer << wbuffer_ << value << '\n';
+		newbuffer << wbuffer_ << value;
 		wbuffer_ = newbuffer.str();
 		return (*this);
 	}

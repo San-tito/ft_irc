@@ -1,129 +1,105 @@
 #include "Parser.hpp"
 
-Parser::Parser() : n_params_(0) { }
-
-void Parser::Request(Client& client, const std::string& request)
+Parser::Parser(void)
 {
-	if (request.empty())
-	{
-		Log::Err() << "Error: empty request.";
-		return ;
-	}
-	Parser parser;
-	if (!parser.parse(request))
-	{
-		Log::Err() << "Error: parsing request from client " << client.getFd();
-		return ;
-	}
-
-	if (!parser.validateCommand())
-		return ;
-	parser.handleRequest(client);
 }
 
-void	Parser::trimString(std::string& str)
+void Parser::Request(Client &client, const std::string &request)
 {
-	size_t start = str.find_first_not_of(" \t\r\n");
-	size_t end = str.find_last_not_of(" \t\r\n");
+	if (!Parse(request))
+	{
+		Log::Info() << "Connection " << client.getFd() << ": Parse error: prefix without command!?";
+		client << "ERROR :Prefix without command\n";
+		return ;
+	}
+	if (!ValidateCommand(client))
+		return ;
+	HandleRequest(client);
+}
 
+void Parser::TrimString(std::string &str)
+{
+	size_t	start;
+	size_t	end;
+
+	start = str.find_first_not_of(" \t\r\n");
+	end = str.find_last_not_of(" \t\r\n");
 	if (start == std::string::npos || end == std::string::npos)
 		str.clear();
 	else
 		str = str.substr(start, end - start + 1);
 }
 
-/**
- * Método que analiza la solicitud IRC y extrae su estructura.
- */
-bool	Parser::parse(const std::string& request)
+bool Parser::Parse(std::string request)
 {
-	std::string	tempRequest = request;
-	trimString(tempRequest);
+	size_t	space_pos;
 
-	size_t spacePos = tempRequest.find(' ');
-	
-	if (tempRequest[0] == ':')
+	TrimString(request);
+	space_pos = request.find(' ');
+	if (request[0] == ':')
 	{
-		if (spacePos == std::string::npos)
+		if (space_pos == std::string::npos)
 			return (false);
-		prefix_ = tempRequest.substr(1, spacePos - 1);
-		tempRequest = tempRequest.substr(spacePos + 1);
+		prefix_ = request.substr(1, space_pos - 1);
+		request = request.substr(space_pos + 1);
 	}
-
-	spacePos = tempRequest.find(' ');
-	if (spacePos != std::string::npos)
+	space_pos = request.find(' ');
+	if (space_pos != std::string::npos)
 	{
-		command_ = tempRequest.substr(0, spacePos);
-		tempRequest = tempRequest.substr(spacePos + 1);
-	} else {
-		command_ = tempRequest;
+		command_ = request.substr(0, space_pos);
+		request = request.substr(space_pos + 1);
+	}
+	else
+	{
+		command_ = request;
 		return (true);
 	}
-
-	parseParams(tempRequest);
+	ParseParams(request);
 	return (true);
 }
 
-void Parser::parseParams(std::string args)
+void Parser::ParseParams(std::string args)
 {
-    trimString(args);
-    size_t spacePos;
+	size_t	space_pos;
 
-    while (!args.empty() && params_.size() < MAX_ARGS)
-    {
-        if (args[0] == ':')
-        {
-            // Si el parámetro comienza con ":", todo lo que sigue debe ser un solo parámetro
-            params_.push_back(args.substr(1)); // Guarda todo el resto como un solo parámetro
-            break;  // Salimos ya que el mensaje es el último parámetro
-        }
-        else
-        {
-            spacePos = args.find(' ');
-            if (spacePos != std::string::npos)
-            {
-                params_.push_back(args.substr(0, spacePos)); // Agrega solo el parámetro actual
-                args = args.substr(spacePos + 1);
-                trimString(args); // Asegura que no queden espacios extra
-            }
-            else
-            {
-                params_.push_back(args);
-                break; // Terminamos de agregar parámetros
-            }
-        }
-    }
+	TrimString(args);
+	while (!args.empty() && params_.size() < MAX_ARGS)
+	{
+		if (args[0] == ':')
+		{
+			params_.push_back(args.substr(1));
+			break ;
+		}
+		else
+		{
+			space_pos = args.find(' ');
+			if (space_pos != std::string::npos)
+			{
+				params_.push_back(args.substr(0, space_pos));
+				args = args.substr(space_pos + 1);
+				TrimString(args);
+			}
+			else
+			{
+				params_.push_back(args);
+				break ;
+			}
+		}
+	}
 }
 
-
-/**
- * Valida el comando usando `CommandType`.
- */
-bool	Parser::validateCommand()
+bool Parser::ValidateCommand(Client &client)
 {
-	CommandType cmdType = getCommandType();
-
-	if (cmdType == CMD_UNKNOWN)
+	if (Cmd::commands.find(command_) == Cmd::commands.end())
 	{
-		Log::Err() << RED"ERROR: Unknow command: '" << command_ << "'." << NC"";
+		Log::Info() << "Connection " << client.getFd() << ": Unknown command: " << command_;
+		client << command_ << " :Unknown command\n";
 		return (false);
 	}
 	return (true);
 }
 
-/**
- * Determina el tipo de comando para optimizar validaciones.
- */
-Parser::CommandType	Parser::getCommandType() const
+void Parser::HandleRequest(Client &client)
 {
-	if (command_ == "PASS") return (CMD_PASS);
-	if (command_ == "JOIN") return (CMD_JOIN);
-	// if (command_ == "PRIVMSG") return (CMD_PRIVMSG);
-	return (CMD_UNKNOWN);
-}
-
-void	Parser::handleRequest(Client& client)
-{
-	Cmd::Init();
 	Cmd::commands[command_](client, params_);
 }
