@@ -6,11 +6,14 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/14 20:08:05 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/15 01:12:12 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
+
+std::string Server::password;
+std::vector<Client> Server::clients;
 
 Server::Server(int argc, char **argv) : sock_(-1)
 {
@@ -19,16 +22,16 @@ Server::Server(int argc, char **argv) : sock_(-1)
 		Log::Notice() << "Usage: " << argv[0] << " <port> <password>";
 		Exit(EXIT_FAILURE);
 	}
-	this->port_ = ParsePort(argv[1]);
-	this->password_ = argv[2];
+	unsigned short port(ParsePort(argv[1]));
+	password = argv[2];
 	Log::Info() << "Server starting ...";
 	Cmd::Init();
 	Sig::Init();
-	this->sock_ = Conn::NewListener(LISTEN_ADDR, this->port_);
+	this->sock_ = Conn::NewListener(LISTEN_ADDR, port);
 	if (this->sock_ < 0)
 		Exit(EXIT_FAILURE);
-	clients_.push_back(Client(this->sock_, POLLIN | POLLPRI));
-	clients_.back().setRegistered(true);
+	clients.push_back(Client(this->sock_, POLLIN | POLLPRI));
+	clients.back().setRegistered(true);
 }
 
 Server::~Server(void)
@@ -54,7 +57,7 @@ void Server::NewConnection(int sock)
 	}
 	if (!Conn::InitSocket(new_sock))
 		return ;
-	clients_.push_back(Client(new_sock, POLLIN | POLLPRI));
+	clients.push_back(Client(new_sock, POLLIN | POLLPRI));
 	Log::Info() << "Accepted connection " << new_sock << " on socket " << sock << '.';
 }
 
@@ -63,19 +66,19 @@ void Server::CloseConnection(int fd)
 	Log::Info() << "Shutting down connection " << fd << " ...";
 	int i(getClient(fd));
 	close(fd);
-	clients_.erase(clients_.begin() + i);
+	clients.erase(clients.begin() + i);
 }
 
 void Server::TimeOutCheck(void)
 {
 	time_t now(time(0));
-	for (size_t i = 0; i < clients_.size(); i++)
+	for (size_t i = 0; i < clients.size(); i++)
 	{
-		if (!clients_[i].isRegistered() && clients_[i].getLastTime() < now
+		if (!clients[i].isRegistered() && clients[i].getLastTime() < now
 			- TIMEOUT)
 		{
-			Log::Info() << "Unregistered connection " << clients_[i].getFd() << " timed out ...";
-			CloseConnection(clients_[i].getFd());
+			Log::Info() << "Unregistered connection " << clients[i].getFd() << " timed out ...";
+			CloseConnection(clients[i].getFd());
 		}
 	}
 }
@@ -84,29 +87,40 @@ void Server::ProcessRequest(Client &client)
 {
 	size_t pos(0);
 	std::string str = client.getReadBuffer();
-	if ((pos = str.find('\n')) == std::string::npos)
-		return ;
-	str = str.substr(0, pos);
-	if (pos > 0 && str[pos - 1] == '\r')
-		str = str.substr(0, pos - 1);
-	if (str.size() > COMMAND_LEN)
+	std::string request;
+	for (int i = 0; i < MAX_COMMANDS; i++)
 	{
-		Log::Err() << "Request too long (connection " << client.getFd() << "): " << str.size() << " bytes (max. " << COMMAND_LEN << " expected)!";
-		CloseConnection(client.getFd());
-		return ;
+		if ((pos = str.find("\r\n")) != std::string::npos)
+		{
+			request = str.substr(0, pos);
+			str = str.substr(pos + 2);
+		}
+		else if ((pos = str.find('\n')) != std::string::npos)
+		{
+			request = str.substr(0, pos);
+			str = str.substr(pos + 1);
+		}
+		else
+			break ;
+		if (str.size() > COMMAND_LEN)
+		{
+			Log::Err() << "Request too long (connection " << client.getFd() << "): " << str.size() << " bytes (max. " << COMMAND_LEN << " expected)!";
+			CloseConnection(client.getFd());
+			return ;
+		}
+		Parser().Request(client, request);
 	}
-	Parser().Request(client, str);
 	client.unsetReadBuffer();
 }
 
 void Server::ProcessBuffers()
 {
-	for (size_t i = 0; i < clients_.size(); i++)
+	for (size_t i = 0; i < clients.size(); i++)
 	{
-		if (!clients_[i].getReadBuffer().empty())
-			ProcessRequest(clients_[i]);
-		if (!clients_[i].getWriteBuffer().empty())
-			clients_[i].setEvents(POLLOUT);
+		if (!clients[i].getReadBuffer().empty())
+			ProcessRequest(clients[i]);
+		if (!clients[i].getWriteBuffer().empty())
+			clients[i].setEvents(POLLOUT);
 	}
 }
 
@@ -132,11 +146,11 @@ void Server::Run(void)
 int Server::Dispatch(void)
 {
 	int ret, fds_ready;
-	std::vector<struct pollfd> pollfds(clients_.size());
-	for (size_t i = 0; i < clients_.size(); ++i)
+	std::vector<struct pollfd> pollfds(clients.size());
+	for (size_t i = 0; i < clients.size(); ++i)
 	{
-		pollfds[i].fd = clients_[i].getFd();
-		pollfds[i].events = clients_[i].getEvents();
+		pollfds[i].fd = clients[i].getFd();
+		pollfds[i].events = clients[i].getEvents();
 	}
 	ret = poll(pollfds.data(), pollfds.size(), 1000);
 	if (ret <= 0)
@@ -167,9 +181,9 @@ int Server::getClient(int fd)
 {
 	size_t	i;
 
-	for (i = 0; i < clients_.size(); i++)
+	for (i = 0; i < clients.size(); i++)
 	{
-		if (clients_[i].getFd() == fd)
+		if (clients[i].getFd() == fd)
 			break ;
 	}
 	return (i);
@@ -195,17 +209,17 @@ void Server::ReadRequest(int sock)
 		return ;
 	}
 	readbuf[len] = '\0';
-	clients_[getClient(sock)].setReadBuffer(readbuf);
+	clients[getClient(sock)].setReadBuffer(readbuf);
 }
 
 void Server::HandleWrite(int sock)
 {
 	ssize_t len(0);
 	int i(getClient(sock));
-	len = write(sock, clients_[i].getWriteBuffer().c_str(),
-			clients_[i].getWriteBuffer().size());
-	clients_[i].unsetEvent(POLLOUT);
-	clients_[i].unsetWriteBuffer();
+	len = write(sock, clients[i].getWriteBuffer().c_str(),
+			clients[i].getWriteBuffer().size());
+	clients[i].unsetEvent(POLLOUT);
+	clients[i].unsetWriteBuffer();
 	if (len < 0)
 	{
 		if (errno == EAGAIN || errno == EINTR)

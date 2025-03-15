@@ -18,6 +18,9 @@ class Client
 	bool isRegistered(void) const;
 	short getEvents(void) const;
 	time_t getLastTime(void) const;
+	std::string getNick(void) const;
+	std::string getUser(void) const;
+	std::string getPassword(void) const;
 	std::string getReadBuffer(void) const;
 	std::string getWriteBuffer(void) const;
 	template <typename T> Client &operator<<(T const &value)
@@ -32,6 +35,9 @@ class Client
 	void setRegistered(bool registered);
 	void setReadBuffer(std::string buffer);
 	void setWriteBuffer(std::string buffer);
+	void setNick(std::string nick);
+	void setUser(std::string user);
+	void setPassword(std::string password);
 	void setEvents(short events);
 	void unsetEvent(short event);
 	void unsetReadBuffer(void);
@@ -42,6 +48,8 @@ class Client
 	std::string wbuffer_;
 	pollfd poll_;
 	std::string user_;
+	std::string nick_;
+	std::string password_;
 	time_t last_time_;
 	bool registered_;
 };

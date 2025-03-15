@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/14 18:07:21 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/15 00:57:59 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,8 @@
 # define READBUFFER_LEN 2048
 # define TIMEOUT 20
 # define COMMAND_LEN 512
+# define MAX_NICK_LEN 9
+# define MAX_COMMANDS 3
 
 class Server
 {
@@ -44,19 +46,18 @@ class Server
 	int Dispatch(void);
 	void ReadRequest(int sock);
 	void HandleWrite(int sock);
-	void CloseConnection(int fd);
 	void TimeOutCheck(void);
-	int getClient(int fd);
 	void ProcessBuffers(void);
 	void ProcessRequest(Client &client);
+	static int getClient(int fd);
+	static void CloseConnection(int fd);
+	static std::string password;
+	static std::vector<Client> clients;
 
   private:
 	unsigned short ParsePort(char *arg);
 
 	int sock_;
-	unsigned short port_;
-	std::string password_;
-	std::vector<Client> clients_;
 };
 
 #endif /* IRCD_HPP */

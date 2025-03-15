@@ -1,10 +1,10 @@
 #ifndef CMD_HPP
 # define CMD_HPP
 
-# include "Client.hpp"
-# include <iostream>
+# include "Parser.hpp"
+# include "Server.hpp"
 # include <map>
-# include <string>
+# include <strings.h>
 # include <vector>
 
 class Cmd
@@ -15,10 +15,11 @@ class Cmd
 		std::vector<std::string>)> commands;
 
   private:
-	static bool ValidateRegister(Client &client);
-	static bool ValidateParams(Client &client, int min, int max, int argc);
+	static void Cap(Client &client, std::vector<std::string> params);
 	static void Join(Client &client, std::vector<std::string> params);
 	static void Pass(Client &client, std::vector<std::string> params);
+	static void Nick(Client &client, std::vector<std::string> params);
+	static void User(Client &client, std::vector<std::string> params);
 };
 
 #endif

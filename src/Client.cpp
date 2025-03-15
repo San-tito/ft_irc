@@ -1,7 +1,6 @@
 #include "Client.hpp"
 
-Client::Client(int fd, short events) : user_(""), last_time_(time(0)),
-	registered_(false)
+Client::Client(int fd, short events) : last_time_(time(0)), registered_(false)
 {
 	poll_.fd = fd;
 	poll_.events = events;
@@ -19,6 +18,36 @@ std::string Client::getReadBuffer(void) const
 std::string Client::getWriteBuffer(void) const
 {
 	return (this->wbuffer_);
+}
+
+std::string Client::getNick(void) const
+{
+	return (this->nick_);
+}
+
+void Client::setNick(std::string nick)
+{
+	this->nick_ = nick;
+}
+
+std::string Client::getUser(void) const
+{
+	return (this->user_);
+}
+
+void Client::setUser(std::string user)
+{
+	this->user_ = user;
+}
+
+std::string Client::getPassword(void) const
+{
+	return (this->password_);
+}
+
+void Client::setPassword(std::string password)
+{
+	this->password_ = password;
 }
 
 void Client::setReadBuffer(std::string buffer)
