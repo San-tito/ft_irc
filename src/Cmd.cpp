@@ -86,14 +86,67 @@ void Cmd::Join(Client &client, std::vector<std::string> params)
 		return ;
 	if (!ValidateParams(client, 1, 2, params.size()))
 		return ;
+	Log::Info() << "Connection " << client.getFd() << ": got JOIN command ..."; //solo pa testeo delete pls
 
-	// recibimos como maximo 2 parametros (channel y key)
+	// recibimos como minimo 1 maximo 2 parametros (channel y key)
 	//JOIN #chan1                     //se une al canal 1 
 	//JOIN #chan1,#chan2              //se une a los canales 1 y 2
 	//JOIN &chan1 key1                //se une al canal 1 con la clave key1
-	//JOIN #chan1,&chan2 key1         //se une al canales 1 con la clave key1 y chan2 no tiene key
+	//JOIN #chan1,&chan2 key1         //se une al canales 1 con la clave key1 y chan2 no tiene key y es local
 	//JOIN #chan1,#chan2,#chan3 key1,key2,key3 //se une a los canales 1,2,3 con las claves key1,2,3
 	//JOIN 0  					  //sale de todos los canales
+}
+
+void Cmd::Part(Client &client, std::vector<std::string> params)
+{
+	if (!ValidateRegister(client))
+		return ;
+	if (!ValidateParams(client, 1, 2, params.size()))
+		return ;
+	Log::Info() << "Connection " << client.getFd() << ": got PART command ..."; //solo pa testeo delete pls
+	// Recibimimos como minimo 1 maximo 2 parametros (channel y part message)
+	//PART #chan1               //Sale del chan1
+	//PART #chan1,#chan2        //Sale del chan1 y chan2 
+	//PART #chan1 :adios papa   //Sale del chan1 y en lugar de mostrar el mensaje predefinido dice el msg enviado "adios papa"
+}
+
+void Cmd::Quit(Client &client, std::vector<std::string> params)
+{
+	if (!ValidateRegister(client))
+		return ;
+	if (!ValidateParams(client, 0, 1, params.size()))
+		return ;
+	Log::Info() << "Connection " << client.getFd() << ": got QUIT command ..."; //solo pa testeo delete pls
+	if (params.size() == 1)
+		Log::Info() << client.getNick() << ": " << params[0];
+	Server::CloseConnection(client.getFd());
+	// Recibimimos como maximo 1 parametro (quit message)
+	//QUIT                            //Se desconecta del server
+	//QUIT :chao pescao               //Se desconecta del server con el mensaje chao pescao
+}
+
+void Cmd::Privmsg(Client &client, std::vector<std::string> params)
+{
+	if (!ValidateRegister(client))
+		return ;
+	if (!ValidateParams(client, 2, 2, params.size()))
+		return ;
+	if (params[0][0] != '#') //se que lo vas a cambiar hijodettoda tu reputisima te quiero mi amor sigue asi <3
+		*ClientSearch(params[0]) << client.getNick() << ": " << params[1] << "\n";
+	// else cuando haya un channel search xd
+		// ChannelSearch(params[0]) << client.getNick() << "!" << client.getUser() << ": " params[1];
+	Log::Info() << "Connection " << client.getFd() << ": got PRIVMSG command ..."; //solo pa testeo delete pls
+	
+	
+	Log::Info() << "msgtarget: " << params[0] << " text2sent: " << params[1]; //solo pa testeo delete pls
+
+
+	// Recibimimos como maximo y minimo 2 parametro (msgtarget y text_to_be_sent)
+	// msgtarget el nick de un usuario o el nombre de un canal
+	// 3.3.1 protocol
+	// se puede llegar a complicar pero basicamente solo seria
+	// PRIVMSG Angel :hola bro                //mensaje priv a user con nick Angel
+	// PRIVMSG #tuqui :hola bros              //mensaje a channel tuqui
 }
 
 void Cmd::Pass(Client &client, std::vector<std::string> params)

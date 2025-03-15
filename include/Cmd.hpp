@@ -17,8 +17,11 @@ class Cmd
   private:
 	static void Join(Client &client, std::vector<std::string> params);
 	static void Pass(Client &client, std::vector<std::string> params);
+	static void Part(Client &client, std::vector<std::string> params);
+	static void Quit(Client &client, std::vector<std::string> params);
 	static void Nick(Client &client, std::vector<std::string> params);
 	static void User(Client &client, std::vector<std::string> params);
+	static void Privmsg(Client &client, std::vector<std::string> params);
 };
 
 #endif
