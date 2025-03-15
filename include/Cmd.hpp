@@ -15,7 +15,6 @@ class Cmd
 		std::vector<std::string>)> commands;
 
   private:
-	static void Cap(Client &client, std::vector<std::string> params);
 	static void Join(Client &client, std::vector<std::string> params);
 	static void Pass(Client &client, std::vector<std::string> params);
 	static void Nick(Client &client, std::vector<std::string> params);

@@ -5,11 +5,13 @@ std::map<std::string, void (*)(Client &,
 
 void Cmd::Init(void)
 {
-	commands["CAP"] = Cap;
 	commands["JOIN"] = Join;
 	commands["NICK"] = Nick;
 	commands["PASS"] = Pass;
+	commands["PART"] = Part;
+	commands["PRIVMSG"] = Privmsg;
 	commands["USER"] = User;
+	commands["QUIT"] = Quit;
 }
 
 static bool	ValidateRegister(Client &client)
@@ -37,7 +39,7 @@ static Client	*ClientSearch(std::string nickname)
 	std::vector<Client>::iterator it = Server::clients.begin();
 	while (it != Server::clients.end())
 	{
-		if (strcasecmp(it->getNick().c_str(), nickname.c_str()) == 0)
+		if (strcmp(it->getNick().c_str(), nickname.c_str()) == 0)
 			return (&(*it));
 		it++;
 	}
@@ -66,7 +68,8 @@ static bool	CheckNickname(Client &client, std::string nickname)
 
 static void	LoginUser(Client &client)
 {
-	if (strcasecmp(client.getPassword().c_str(), Server::password.c_str()) != 0)
+	if (!Server::password.empty() && strcmp(client.getPassword().c_str(),
+			Server::password.c_str()) != 0)
 	{
 		Log::Err() << "User \"" << client.getUser() << "\" rejected (connection " << client.getFd() << "): Bad server password!";
 		Server::CloseConnection(client.getFd());
@@ -77,19 +80,20 @@ static void	LoginUser(Client &client)
 	client << client.getNick() << " :Welcome to the jungle!\n";
 }
 
-void Cmd::Cap(Client &client, std::vector<std::string> params)
-{
-	if (!ValidateParams(client, 1, 2, params.size()))
-		return ;
-	Log::Info() << "Connection " << client.getFd() << ": got CAP command ...";
-}
-
 void Cmd::Join(Client &client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
 	if (!ValidateParams(client, 1, 2, params.size()))
 		return ;
+
+	// recibimos como maximo 2 parametros (channel y key)
+	//JOIN #chan1                     //se une al canal 1 
+	//JOIN #chan1,#chan2              //se une a los canales 1 y 2
+	//JOIN &chan1 key1                //se une al canal 1 con la clave key1
+	//JOIN #chan1,&chan2 key1         //se une al canales 1 con la clave key1 y chan2 no tiene key
+	//JOIN #chan1,#chan2,#chan3 key1,key2,key3 //se une a los canales 1,2,3 con las claves key1,2,3
+	//JOIN 0  					  //sale de todos los canales
 }
 
 void Cmd::Pass(Client &client, std::vector<std::string> params)
