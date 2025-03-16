@@ -6,7 +6,7 @@
 #    By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/09/09 15:07:57 by sguzman           #+#    #+#              #
-#    Updated: 2025/03/14 16:22:54 by ncastell         ###   ########.fr        #
+#    Updated: 2025/03/15 22:25:38 by sguzman          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -32,7 +32,7 @@ SRCS_PATH    = ./src
 OBJS_PATH    = ./build
 INCLUDE_PATH = ./include
 
-SRCS         = Conn.cpp Server.cpp Log.cpp Cmd.cpp Sig.cpp Client.cpp Parser.cpp
+SRCS         = Channel.cpp Cmd.cpp Log.cpp Membership.cpp Server.cpp Client.cpp Conn.cpp Parser.cpp Sig.cpp
 MAIN         = main.cpp
 
 ################################################################################

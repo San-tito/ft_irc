@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/15 01:12:12 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/15 23:55:49 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 
 std::string Server::password;
 std::vector<Client> Server::clients;
+std::vector<Channel> Server::channels;
+std::vector<Membership> Server::memberships;
 
 Server::Server(int argc, char **argv) : sock_(-1)
 {
@@ -86,34 +88,34 @@ void Server::TimeOutCheck(void)
 void Server::ProcessRequest(Client &client)
 {
 	size_t pos(0);
+	std::string command;
 	std::string str = client.getReadBuffer();
-	std::string request;
 	for (int i = 0; i < MAX_COMMANDS; i++)
 	{
 		if ((pos = str.find("\r\n")) != std::string::npos)
 		{
-			request = str.substr(0, pos);
+			command = str.substr(0, pos);
 			str = str.substr(pos + 2);
 		}
 		else if ((pos = str.find('\n')) != std::string::npos)
 		{
-			request = str.substr(0, pos);
+			command = str.substr(0, pos);
 			str = str.substr(pos + 1);
 		}
 		else
 			break ;
-		if (str.size() > COMMAND_LEN)
+		if (command.size() > COMMAND_LEN)
 		{
 			Log::Err() << "Request too long (connection " << client.getFd() << "): " << str.size() << " bytes (max. " << COMMAND_LEN << " expected)!";
 			CloseConnection(client.getFd());
 			return ;
 		}
-		Parser().Request(client, request);
+		Parser().Request(client, command);
 	}
 	client.unsetReadBuffer();
 }
 
-void Server::ProcessBuffers()
+void Server::ProcessBuffers(void)
 {
 	for (size_t i = 0; i < clients.size(); i++)
 	{
