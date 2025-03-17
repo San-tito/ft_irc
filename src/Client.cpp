@@ -114,3 +114,40 @@ void Client::unsetWriteBuffer(void)
 {
 	this->wbuffer_.clear();
 }
+
+bool Client::IsValidNick(const std::string &nick)
+{
+	if (nick.size() > MAX_NICK_LEN)
+		return (false);
+	if (nick.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]\\`_^{|}-") != std::string::npos)
+		return (false);
+	return (true);
+}
+
+Client *Client::Search(const std::string &nick)
+{
+	std::vector<Client>::iterator it(Server::clients.begin());
+	while (it != Server::clients.end())
+	{
+		if (it->getNick() == nick)
+			return (&(*it));
+		++it;
+	}
+	return (0);
+}
+
+void Client::Destroy(Client &client)
+{
+	std::vector<Client>::iterator it(Server::clients.begin());
+	while (it != Server::clients.end())
+	{
+		if (it->getFd() == client.getFd())
+		{
+			Log::Info() << "Shutting down connection " << it->getFd() << " ...";
+			close(it->getFd());
+			Server::clients.erase(it);
+			break ;
+		}
+		++it;
+	}
+}

@@ -34,45 +34,13 @@ static bool	ValidateParams(Client &client, int min, int max, int argc)
 	return (true);
 }
 
-static Client	*ClientSearch(std::string nickname)
-{
-	std::vector<Client>::iterator it = Server::clients.begin();
-	while (it != Server::clients.end())
-	{
-		if (strcmp(it->getNick().c_str(), nickname.c_str()) == 0)
-			return (&(*it));
-		it++;
-	}
-	return (NULL);
-}
-
-static bool	CheckNickname(Client &client, std::string nickname)
-{
-	if (nickname.size() > MAX_NICK_LEN)
-	{
-		client << "Nickname too long, max. " << MAX_NICK_LEN << " chars\n";
-		return (false);
-	}
-	if (nickname.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789[]\\`_^{|}-") != std::string::npos)
-	{
-		client << "Erroneous nickname\n";
-		return (false);
-	}
-	if (ClientSearch(nickname))
-	{
-		client << "Nickname already in use\n";
-		return (false);
-	}
-	return (true);
-}
-
 static void	LoginUser(Client &client)
 {
 	if (!Server::password.empty() && strcmp(client.getPassword().c_str(),
 			Server::password.c_str()) != 0)
 	{
 		Log::Err() << "User \"" << client.getUser() << "\" rejected (connection " << client.getFd() << "): Bad server password!";
-		Server::CloseConnection(client.getFd());
+		Client::Destroy(client);
 		return ;
 	}
 	client.setRegistered(true);
@@ -96,14 +64,14 @@ void Cmd::Join(Client &client, std::vector<std::string> params)
 		Channel::PartAll(client);
 		return ;
 	}
-	char flag(0);
+	bool moderated(false);
 	std::string channame;
 	std::stringstream chan_ss(params[0]);
 	while (std::getline(chan_ss, channame, ','))
 	{
 		Channel *chan(Channel::Search(channame));
-		Membership *memb(Membership::Get(client, *chan));
-		if (chan && memb)
+		Membership *is_member(chan ? Membership::Get(client, *chan) : 0);
+		if (is_member)
 			continue ;
 		if (chan)
 		{
@@ -111,11 +79,19 @@ void Cmd::Join(Client &client, std::vector<std::string> params)
 			// 	continue ;
 		}
 		if (!chan && channame[0] != '+')
-			flag = 'o';
+			moderated = true;
+		client << "after: " << channame << '\n';
 		if (!Channel::Join(client, channame))
 			continue ;
-		if (flag == 'o')
-			memb->AddMode('o');
+		client << "before: " << channame << '\n';
+		if (!chan)
+		{
+			chan = Channel::Search(channame);
+			is_member = Membership::Get(client, *chan);
+		}
+		if (moderated)
+			is_member->AddMode('o');
+		/* tell users in this channel about the new client */
 		client << "JOIN: " << channame << '\n';
 	}
 }
@@ -143,15 +119,9 @@ void Cmd::Quit(Client &client, std::vector<std::string> params)
 		return ;
 	if (!ValidateParams(client, 0, 1, params.size()))
 		return ;
-	Log::Info() << "Connection " << client.getFd() << ": got QUIT command ...";
-	// solo pa testeo delete pls
 	if (params.size() == 1)
 		Log::Info() << client.getNick() << ": " << params[0];
-	Server::CloseConnection(client.getFd());
-	// Recibimimos como maximo 1 parametro (quit message)
-	// QUIT                            //Se desconecta del server
-	// QUIT :chao pescao
-	// Se desconecta del server con el mensaje chao pescao
+	Client::Destroy(client);
 }
 
 void Cmd::Privmsg(Client &client, std::vector<std::string> params)
@@ -160,9 +130,8 @@ void Cmd::Privmsg(Client &client, std::vector<std::string> params)
 		return ;
 	if (!ValidateParams(client, 2, 2, params.size()))
 		return ;
-	if (params[0][0] != '#')
-		// se que lo vas a cambiar hijodettoda tu reputisima te quiero mi amor sigue asi <3
-		*ClientSearch(params[0]) << client.getNick() << ": " << params[1] << "\n";
+	// if (params[0][0] != '#')
+	// 	*ClientSearch(params[0]) << client.getNick() << ": " << params[1] << "\n";
 	// else cuando haya un channel search xd
 	// ChannelSearch(params[0]) << client.getNick() << "!" << client.getUser() << ": " params[1];
 	Log::Info() << "Connection " << client.getFd() << ": got PRIVMSG command ...";
@@ -197,8 +166,19 @@ void Cmd::Nick(Client &client, std::vector<std::string> params)
 		return ;
 	if (strcasecmp(client.getNick().c_str(), params[0].c_str()) != 0)
 	{
-		if (!CheckNickname(client, params[0]))
+		if (!Client::IsValidNick(params[0]))
+		{
+			if (params[0].size() > MAX_NICK_LEN)
+				client << "Nickname too long\n";
+			else
+				client << "Erroneous nickname\n";
 			return ;
+		}
+		if (Client::Search(params[0]))
+		{
+			client << "Nickname already in use\n";
+			return ;
+		}
 	}
 	if (!client.isRegistered())
 	{
@@ -228,7 +208,7 @@ void Cmd::User(Client &client, std::vector<std::string> params)
 	{
 		if (params[0].find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+-@._") != std::string::npos)
 		{
-			Server::CloseConnection(client.getFd());
+			Client::Destroy(client);
 			return ;
 		}
 		client.setUser(params[0]);

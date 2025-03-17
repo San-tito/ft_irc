@@ -1,6 +1,7 @@
 #ifndef CLIENT_HPP
 # define CLIENT_HPP
 
+# include "Server.hpp"
 # include <cstdlib>
 # include <ctime>
 # include <netinet/in.h>
@@ -8,6 +9,9 @@
 # include <sstream>
 # include <string>
 # include <unistd.h>
+
+class	Channel;
+class	Membership;
 
 class Client
 {
@@ -42,6 +46,9 @@ class Client
 	void unsetEvent(short event);
 	void unsetReadBuffer(void);
 	void unsetWriteBuffer(void);
+	static bool IsValidNick(const std::string &nick);
+	static Client *Search(const std::string &nick);
+	static void Destroy(Client &client);
 
   private:
 	std::string rbuffer_;

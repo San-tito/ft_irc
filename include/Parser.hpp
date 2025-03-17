@@ -4,6 +4,7 @@
 # include "Client.hpp"
 # include "Cmd.hpp"
 # include "Log.hpp"
+# include "Server.hpp"
 # include <cstdlib>
 # include <cstring>
 # include <iostream>
@@ -11,6 +12,8 @@
 # include <vector>
 
 # define MAX_ARGS 15
+
+class	Client;
 
 class Parser
 {

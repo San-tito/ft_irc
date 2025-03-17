@@ -8,6 +8,9 @@
 # include <string>
 # include <vector>
 
+class	Client;
+class	Membership;
+
 class Channel
 {
   public:

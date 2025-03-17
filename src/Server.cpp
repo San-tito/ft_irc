@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/15 23:55:49 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/17 10:46:18 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,14 +63,6 @@ void Server::NewConnection(int sock)
 	Log::Info() << "Accepted connection " << new_sock << " on socket " << sock << '.';
 }
 
-void Server::CloseConnection(int fd)
-{
-	Log::Info() << "Shutting down connection " << fd << " ...";
-	int i(getClient(fd));
-	close(fd);
-	clients.erase(clients.begin() + i);
-}
-
 void Server::TimeOutCheck(void)
 {
 	time_t now(time(0));
@@ -80,7 +72,7 @@ void Server::TimeOutCheck(void)
 			- TIMEOUT)
 		{
 			Log::Info() << "Unregistered connection " << clients[i].getFd() << " timed out ...";
-			CloseConnection(clients[i].getFd());
+			Client::Destroy(clients[i]);
 		}
 	}
 }
@@ -107,7 +99,7 @@ void Server::ProcessRequest(Client &client)
 		if (command.size() > COMMAND_LEN)
 		{
 			Log::Err() << "Request too long (connection " << client.getFd() << "): " << str.size() << " bytes (max. " << COMMAND_LEN << " expected)!";
-			CloseConnection(client.getFd());
+			Client::Destroy(client);
 			return ;
 		}
 		Parser().Request(client, command);
@@ -168,10 +160,10 @@ int Server::Dispatch(void)
 				if (pollfds[i].fd == this->sock_)
 					NewConnection(this->sock_);
 				else
-					ReadRequest(pollfds[i].fd);
+					ReadRequest(clients[i]);
 			}
 			if (pollfds[i].revents & POLLOUT)
-				HandleWrite(pollfds[i].fd);
+				HandleWrite(clients[i]);
 		}
 		if (fds_ready <= 0)
 			break ;
@@ -179,55 +171,42 @@ int Server::Dispatch(void)
 	return (ret);
 }
 
-int Server::getClient(int fd)
-{
-	size_t	i;
-
-	for (i = 0; i < clients.size(); i++)
-	{
-		if (clients[i].getFd() == fd)
-			break ;
-	}
-	return (i);
-}
-
-void Server::ReadRequest(int sock)
+void Server::ReadRequest(Client &client)
 {
 	ssize_t	len;
 	char	readbuf[READBUFFER_LEN];
 
-	len = read(sock, readbuf, sizeof(readbuf));
+	len = read(client.getFd(), readbuf, sizeof(readbuf));
 	if (len == 0)
 	{
-		CloseConnection(sock);
+		Client::Destroy(client);
 		return ;
 	}
 	if (len < 0)
 	{
 		if (errno == EAGAIN)
 			return ;
-		Log::Err() << "Read error on connection " << sock << ": " << strerror(errno) << '!';
-		CloseConnection(sock);
+		Log::Err() << "Read error on connection " << client.getFd() << ": " << strerror(errno) << '!';
+		Client::Destroy(client);
 		return ;
 	}
 	readbuf[len] = '\0';
-	clients[getClient(sock)].setReadBuffer(readbuf);
+	client.setReadBuffer(readbuf);
 }
 
-void Server::HandleWrite(int sock)
+void Server::HandleWrite(Client &client)
 {
 	ssize_t len(0);
-	int i(getClient(sock));
-	len = write(sock, clients[i].getWriteBuffer().c_str(),
-			clients[i].getWriteBuffer().size());
-	clients[i].unsetEvent(POLLOUT);
-	clients[i].unsetWriteBuffer();
+	len = write(client.getFd(), client.getWriteBuffer().c_str(),
+			client.getWriteBuffer().size());
+	client.unsetEvent(POLLOUT);
+	client.unsetWriteBuffer();
 	if (len < 0)
 	{
 		if (errno == EAGAIN || errno == EINTR)
 			return ;
-		Log::Err() << "Write error on connection " << sock << ": " << strerror(errno) << '!';
-		CloseConnection(sock);
+		Log::Err() << "Write error on connection " << client.getFd() << ": " << strerror(errno) << '!';
+		Client::Destroy(client);
 	}
 }
 

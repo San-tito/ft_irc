@@ -73,10 +73,15 @@ bool Channel::Join(Client &client, const std::string &name)
 	{
 		if (Membership::Get(client, *channel))
 			return (false);
+		Server::channels.push_back(*channel);
+		Server::memberships.push_back(Membership(client, *channel));
 	}
 	else
-		Server::channels.push_back(*channel = Channel(name));
-	Server::memberships.push_back(Membership(client, *channel));
+	{
+		Channel chan(name);
+		Server::channels.push_back(chan);
+		Server::memberships.push_back(Membership(client, chan));
+	}
 	return (true);
 }
 

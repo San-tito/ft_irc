@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/16 00:52:14 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/17 10:35:20 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,8 +50,6 @@ class Server
 	void Run(void);
 	void Exit(int status);
 	int Dispatch(void);
-	static int getClient(int fd);
-	static void CloseConnection(int fd);
 	static std::string password;
 	static std::vector<Client> clients;
 	static std::vector<Channel> channels;
@@ -61,8 +59,8 @@ class Server
 	int sock_;
 	unsigned short ParsePort(char *arg);
 	void NewConnection(int sock);
-	void ReadRequest(int sock);
-	void HandleWrite(int sock);
+	void ReadRequest(Client &client);
+	void HandleWrite(Client &client);
 	void TimeOutCheck(void);
 	void ProcessBuffers(void);
 	void ProcessRequest(Client &client);
