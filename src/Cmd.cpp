@@ -63,10 +63,10 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 		Channel::PartAll(client);
 		return ;
 	}
-	bool moderated(false);
+	bool op(false);
 	std::string channame;
-	std::stringstream chan_ss(params[0]);
-	while (std::getline(chan_ss, channame, ','))
+	std::stringstream ss(params[0]);
+	while (std::getline(ss, channame, ','))
 	{
 		Channel *chan(Channel::Search(channame));
 		Membership *is_member(chan ? Membership::Get(client, chan) : 0);
@@ -78,7 +78,7 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 			// 	continue ;
 		}
 		if (!chan && channame[0] != '+')
-			moderated = true;
+			op = true;
 		if (!Channel::Join(client, channame))
 			continue ;
 		if (!chan)
@@ -86,10 +86,9 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 			chan = Channel::Search(channame);
 			is_member = Membership::Get(client, chan);
 		}
-		if (moderated)
+		if (op)
 			is_member->AddMode('o');
-		/* tell users in this channel about the new client */
-		(*client) << "JOIN: " << channame << '\n';
+		(*chan) << ":" << client->getNick() << " JOIN " << chan->getName() << '\n';
 	}
 }
 
@@ -125,8 +124,43 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 2, 2, params.size()))
+	if (params.size() == 0)
+	{
+		(*client) << "No recipient given\n";
 		return ;
+	}
+	else if (params.size() == 1)
+	{
+		(*client) << "No text to send\n";
+		return ;
+	}
+	else if (!ValidateParams(client, 2, 2, params.size()))
+		return ;
+	else if (params[0].empty())
+	{
+		(*client) << "No text to send\n";
+		return ;
+	}
+	std::string target;
+	std::stringstream ss(params[0]);
+	while (std::getline(ss, target, ','))
+	{
+		Client *dest(0);
+		Channel *chan(0);
+		if (target.find('!') != std::string::npos)
+			dest = Client::Search(target);
+		else
+		{
+			std::string nick(target.substr(0, target.find('!')));
+			dest = Client::Search(nick);
+		}
+		if (dest)
+			(*dest) << ":" << client->getNick() << " PRIVMSG " << target << " :" << params[1] << '\n';
+		else if ((chan = Channel::Search(target)))
+			(*chan) << ":" << client->getNick() << " PRIVMSG " << target << " :" << params[1] << '\n';
+		else
+			(*client) << "No such nick or channel name\n";
+	}
 }
 
 void Cmd::Pass(Client *client, std::vector<std::string> params)

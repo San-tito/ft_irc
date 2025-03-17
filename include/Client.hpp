@@ -30,7 +30,7 @@ class Client
 		newbuffer << wbuffer_ << value;
 		wbuffer_ = newbuffer.str();
 		return (*this);
-	}
+	};
 	void setFd(int fd);
 	void setLastTime(time_t last_time);
 	void setRegistered(bool registered);
@@ -43,6 +43,7 @@ class Client
 	void unsetEvent(short event);
 	void unsetReadBuffer(void);
 	void unsetWriteBuffer(void);
+	static void Exit(void);
 	static bool IsValidNick(const std::string &nick);
 	static Client *Search(const std::string &nick);
 	static void Destroy(Client *client);

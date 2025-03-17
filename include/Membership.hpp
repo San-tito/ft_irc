@@ -6,7 +6,9 @@
 # include <cstddef>
 # include <set>
 # include <string>
+# include <vector>
 
+class	Client;
 class	Channel;
 
 class Membership
@@ -17,6 +19,7 @@ class Membership
 	Client *getClient(void);
 	Channel *getChannel(void);
 	void AddMode(char mode);
+	static void Exit(void);
 	static Membership *Get(Client *client, Channel *channel);
 
   private:

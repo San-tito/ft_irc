@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/17 18:56:13 by naomy            ###   ########.fr       */
+/*   Updated: 2025/03/18 00:13:28 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,19 +38,15 @@ Server::Server(int argc, char **argv) : sock_(-1)
 
 Server::~Server(void)
 {
-	size_t i(0);
-	for (i = 0; i < clients.size(); i++)
-		delete (clients[i]);
-	for (i = 0; i < channels.size(); i++)
-		delete (channels[i]);
-	for (i = 0; i < memberships.size(); i++)
-		delete (memberships[i]);
 	if (this->sock_ >= 0)
 	{
 		close(this->sock_);
 		Log::Info() << "Listening socket " << this->sock_ << " closed.\n";
 	}
 	Sig::Exit();
+	Client::Exit();
+	Channel::Exit();
+	Membership::Exit();
 }
 
 void Server::NewConnection(int sock)

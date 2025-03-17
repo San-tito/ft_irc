@@ -8,6 +8,42 @@ Channel::~Channel(void)
 {
 }
 
+Channel &Channel::operator<<(const char &message)
+{
+	std::vector<Client *>::iterator it(Server::clients.begin());
+	while (it != Server::clients.end())
+	{
+		if (Membership::Get(*it, this))
+			(*(*it)) << message;
+		++it;
+	}
+	return (*this);
+}
+
+Channel &Channel::operator<<(const char *message)
+{
+	std::vector<Client *>::iterator it(Server::clients.begin());
+	while (it != Server::clients.end())
+	{
+		if (Membership::Get(*it, this))
+			(*(*it)) << message;
+		++it;
+	}
+	return (*this);
+}
+
+Channel &Channel::operator<<(const std::string &message)
+{
+	std::vector<Client *>::iterator it(Server::clients.begin());
+	while (it != Server::clients.end())
+	{
+		if (Membership::Get(*it, this))
+			(*(*it)) << message;
+		++it;
+	}
+	return (*this);
+}
+
 std::string Channel::getName(void) const
 {
 	return (name_);
@@ -36,6 +72,16 @@ size_t Channel::getMaxUsers(void) const
 void Channel::AddMode(char mode)
 {
 	modes_.insert(mode);
+}
+
+void Channel::Exit(void)
+{
+	std::vector<Channel *>::iterator it(Server::channels.begin());
+	while (it != Server::channels.end())
+	{
+		delete (*it);
+		++it;
+	}
 }
 
 bool Channel::IsValidName(const std::string &name)
@@ -75,8 +121,10 @@ bool Channel::Join(Client *client, const std::string &name)
 			return (false);
 	}
 	else
+	{
 		channel = new Channel(name);
-	Server::channels.push_back(channel);
+		Server::channels.push_back(channel);
+	}
 	Server::memberships.push_back(new Membership(client, channel));
 	return (true);
 }

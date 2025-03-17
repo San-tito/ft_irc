@@ -115,6 +115,16 @@ void Client::unsetWriteBuffer(void)
 	this->wbuffer_.clear();
 }
 
+void Client::Exit(void)
+{
+	std::vector<Client *>::iterator it(Server::clients.begin());
+	while (it != Server::clients.end())
+	{
+		delete (*it);
+		++it;
+	}
+}
+
 bool Client::IsValidNick(const std::string &nick)
 {
 	if (nick.size() > MAX_NICK_LEN)

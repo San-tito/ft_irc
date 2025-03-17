@@ -24,6 +24,16 @@ void Membership::AddMode(char mode)
 	modes_.insert(mode);
 }
 
+void Membership::Exit(void)
+{
+	std::vector<Membership *>::iterator it(Server::memberships.begin());
+	while (it != Server::memberships.end())
+	{
+		delete (*it);
+		++it;
+	}
+}
+
 Membership *Membership::Get(Client *client, Channel *channel)
 {
 	std::vector<Membership *>::iterator it(Server::memberships.begin());

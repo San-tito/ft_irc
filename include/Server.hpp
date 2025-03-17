@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/17 18:55:11 by naomy            ###   ########.fr       */
+/*   Updated: 2025/03/18 00:15:59 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,7 @@
 # define MAX_NICK_LEN 9
 # define MAX_COMMANDS 3
 
+class	Client;
 class	Channel;
 class	Membership;
 
