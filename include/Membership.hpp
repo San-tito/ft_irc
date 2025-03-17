@@ -7,22 +7,21 @@
 # include <set>
 # include <string>
 
-class	Client;
 class	Channel;
 
 class Membership
 {
   public:
-	Membership(Client &client, Channel &channel);
+	Membership(Client *client, Channel *channel);
 	~Membership(void);
-	Client &getClient(void);
-	Channel &getChannel(void);
+	Client *getClient(void);
+	Channel *getChannel(void);
 	void AddMode(char mode);
-	static Membership *Get(Client &client, Channel &channel);
+	static Membership *Get(Client *client, Channel *channel);
 
   private:
-	Client &client_;
-	Channel &channel_;
+	Client *client_;
+	Channel *channel_;
 	std::set<char> modes_;
 };
 

@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/17 10:35:20 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/17 18:55:11 by naomy            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,6 @@
 # define MAX_NICK_LEN 9
 # define MAX_COMMANDS 3
 
-class	Client;
 class	Channel;
 class	Membership;
 
@@ -51,19 +50,19 @@ class Server
 	void Exit(int status);
 	int Dispatch(void);
 	static std::string password;
-	static std::vector<Client> clients;
-	static std::vector<Channel> channels;
-	static std::vector<Membership> memberships;
+	static std::vector<Client *> clients;
+	static std::vector<Channel *> channels;
+	static std::vector<Membership *> memberships;
 
   private:
 	int sock_;
 	unsigned short ParsePort(char *arg);
 	void NewConnection(int sock);
-	void ReadRequest(Client &client);
-	void HandleWrite(Client &client);
-	void TimeOutCheck(void);
+	void ReadRequest(Client *client);
+	void HandleWrite(Client *client);
+	void ProcessRequest(Client *client);
 	void ProcessBuffers(void);
-	void ProcessRequest(Client &client);
+	void TimeOutCheck(void);
 };
 
 #endif /* IRCD_HPP */

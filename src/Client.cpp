@@ -126,25 +126,25 @@ bool Client::IsValidNick(const std::string &nick)
 
 Client *Client::Search(const std::string &nick)
 {
-	std::vector<Client>::iterator it(Server::clients.begin());
+	std::vector<Client *>::iterator it(Server::clients.begin());
 	while (it != Server::clients.end())
 	{
-		if (it->getNick() == nick)
-			return (&(*it));
+		if ((*it)->getNick() == nick)
+			return (*it);
 		++it;
 	}
 	return (0);
 }
 
-void Client::Destroy(Client &client)
+void Client::Destroy(Client *client)
 {
-	std::vector<Client>::iterator it(Server::clients.begin());
+	std::vector<Client *>::iterator it(Server::clients.begin());
 	while (it != Server::clients.end())
 	{
-		if (it->getFd() == client.getFd())
+		if (*it == client)
 		{
-			Log::Info() << "Shutting down connection " << it->getFd() << " ...";
-			close(it->getFd());
+			Log::Info() << "Shutting down connection " << (*it)->getFd() << " ...";
+			close((*it)->getFd());
 			Server::clients.erase(it);
 			break ;
 		}

@@ -24,14 +24,14 @@ class Parser
 
   public:
 	Parser(void);
-	void Request(Client &client, const std::string &str);
+	void Request(Client *client, const std::string &str);
 
   private:
 	void TrimString(std::string &str);
 	bool Parse(std::string request);
 	void ParseParams(std::string args);
-	bool ValidateCommand(Client &client);
-	void HandleRequest(Client &client);
+	bool ValidateCommand(Client *client);
+	void HandleRequest(Client *client);
 };
 
 #endif

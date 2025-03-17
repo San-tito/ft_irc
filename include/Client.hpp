@@ -10,9 +10,6 @@
 # include <string>
 # include <unistd.h>
 
-class	Channel;
-class	Membership;
-
 class Client
 {
   public:
@@ -48,7 +45,7 @@ class Client
 	void unsetWriteBuffer(void);
 	static bool IsValidNick(const std::string &nick);
 	static Client *Search(const std::string &nick);
-	static void Destroy(Client &client);
+	static void Destroy(Client *client);
 
   private:
 	std::string rbuffer_;

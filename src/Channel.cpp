@@ -51,58 +51,54 @@ bool Channel::IsValidName(const std::string &name)
 
 Channel *Channel::Search(const std::string &name)
 {
-	std::vector<Channel>::iterator it(Server::channels.begin());
+	std::vector<Channel *>::iterator it(Server::channels.begin());
 	while (it != Server::channels.end())
 	{
-		if (it->getName() == name)
-			return (&(*it));
+		if ((*it)->getName() == name)
+			return (*it);
 		++it;
 	}
 	return (0);
 }
 
-bool Channel::Join(Client &client, const std::string &name)
+bool Channel::Join(Client *client, const std::string &name)
 {
 	if (!IsValidName(name))
 	{
-		client << name << " :No such channel\n";
+		(*client) << name << " :No such channel\n";
 		return (false);
 	}
 	Channel *channel(Channel::Search(name));
 	if (channel)
 	{
-		if (Membership::Get(client, *channel))
+		if (Membership::Get(client, channel))
 			return (false);
-		Server::channels.push_back(*channel);
-		Server::memberships.push_back(Membership(client, *channel));
 	}
 	else
-	{
-		Channel chan(name);
-		Server::channels.push_back(chan);
-		Server::memberships.push_back(Membership(client, chan));
-	}
+		channel = new Channel(name);
+	Server::channels.push_back(channel);
+	Server::memberships.push_back(new Membership(client, channel));
 	return (true);
 }
 
-void Channel::PartAll(Client &client)
+void Channel::PartAll(Client *client)
 {
 	(void)client;
 }
 
-void Channel::Part(Client &client, const std::string &name,
+void Channel::Part(Client *client, const std::string &name,
 	const std::string &reason)
 {
 	Channel *channel(Channel::Search(name));
 	if (!channel)
 	{
-		client << name << " :No such channel\n";
+		(*client) << name << " :No such channel\n";
 		return ;
 	}
-	Membership *membership(Membership::Get(client, *channel));
+	Membership *membership(Membership::Get(client, channel));
 	if (membership == 0)
 	{
-		client << name << " :You're not on that channel\n";
+		(*client) << name << " :You're not on that channel\n";
 		return ;
 	}
 	(void)reason;

@@ -9,7 +9,7 @@
 # include <vector>
 
 class	Client;
-class	Membership;
+class	Server;
 
 class Channel
 {
@@ -24,9 +24,9 @@ class Channel
 	void AddMode(char mode);
 	static bool IsValidName(const std::string &name);
 	static Channel *Search(const std::string &name);
-	static bool Join(Client &client, const std::string &name);
-	static void PartAll(Client &client);
-	static void Part(Client &client, const std::string &name,
+	static bool Join(Client *client, const std::string &name);
+	static void PartAll(Client *client);
+	static void Part(Client *client, const std::string &name,
 		const std::string &reason);
 
   private:
