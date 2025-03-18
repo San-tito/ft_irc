@@ -60,6 +60,17 @@ bool Channel::IsInvited(Client *client) const
 	return (false);
 }
 
+void Channel::Write(Client *client, const std::string &message)
+{
+	std::vector<Membership *>::iterator it(Server::memberships.begin());
+	while (it != Server::memberships.end())
+	{
+		if ((*it)->getChannel() == this && (*it)->getClient() != client)
+			(*(*it)->getClient()) << message;
+		++it;
+	}
+}
+
 void Channel::Exit(void)
 {
 	std::vector<Channel *>::iterator it(Server::channels.begin());
@@ -92,18 +103,6 @@ size_t Channel::MemberCount(const Channel *channel)
 		++it;
 	}
 	return (count);
-}
-
-void Channel::Write(Client *client, Channel *channel, const std::string &message)
-{
-	std::vector<Membership *>::iterator it(Server::memberships.begin());
-	while (it != Server::memberships.end())
-	{
-		if ((*it)->getChannel() == channel
-			&& (*it)->getClient() != client)
-			(*(*it)->getClient()) << message;
-		++it;
-	}
 }
 
 Channel *Channel::Search(const std::string &name)
