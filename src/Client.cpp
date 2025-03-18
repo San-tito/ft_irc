@@ -146,6 +146,21 @@ Client *Client::Search(const std::string &nick)
 	return (0);
 }
 
+void Client::Mode(Client *client, std::vector<std::string> &params,
+	Client *target)
+{
+	if (target != client)
+	{
+		(*client) << "Can't set/get mode for other users\n";
+		return ;
+	}
+	if (params.size() == 1)
+	{
+		(*client) << target->getNick() << (target->isRegistered() ? " registered" : " unregistered") << '\n';
+		return ;
+	}
+}
+
 void Client::Destroy(Client *client)
 {
 	std::vector<Client *>::iterator it(Server::clients.begin());

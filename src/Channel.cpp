@@ -33,6 +33,21 @@ size_t Channel::getMaxUsers(void) const
 	return (max_users_);
 }
 
+void Channel::setMaxUsers(size_t max_users)
+{
+	max_users_ = max_users;
+}
+
+void Channel::setTopic(const std::string &topic)
+{
+	topic_ = topic;
+}
+
+void Channel::setKey(const std::string &key)
+{
+	key_ = key;
+}
+
 void Channel::AddMode(char mode)
 {
 	modes_.insert(mode);
@@ -41,6 +56,11 @@ void Channel::AddMode(char mode)
 bool Channel::HasMode(char mode) const
 {
 	return (modes_.find(mode) != modes_.end());
+}
+
+void Channel::DelMode(char mode)
+{
+	modes_.erase(mode);
 }
 
 void Channel::AddInvite(Client *client)
@@ -117,6 +137,98 @@ Channel *Channel::Search(const std::string &name)
 	return (0);
 }
 
+void Channel::Mode(Client *client, std::vector<std::string> &params,
+	Channel *target)
+{
+	if (target->getName()[0] == '+')
+	{
+		(*client) << target->getName() << " :Channel doesn't support modes\n";
+		return ;
+	}
+	if (params.size() <= 1)
+	{
+		std::set<char> modes(target->getModes());
+		(*client) << target->getName() << " :Modes: ";
+		for (std::set<char>::iterator it(modes.begin()); it != modes.end(); ++it)
+			(*client) << *it;
+		(*client) << "\n";
+		return ;
+	}
+	Membership *member(Membership::Get(client, target));
+	if (!member)
+	{
+		(*client) << target->getName() << " :You are not on that channel\n";
+		return ;
+	}
+	bool is_op(member->HasMode('o'));
+	for (size_t i = 1; i < params.size(); i++)
+	{
+		bool set(false);
+		std::string mode(params[i]);
+		if (mode[0] == '+')
+		{
+			set = true;
+			mode = mode.substr(1);
+		}
+		else if (mode[0] == '-')
+			mode = mode.substr(1);
+		if (!is_op)
+		{
+			(*client) << target->getName() << " :You are not channel operator\n";
+			break ;
+		}
+		switch (mode[0])
+		{
+		case 'i':
+		case 't':
+			set ? target->AddMode(mode[0]) : target->DelMode(mode[0]);
+			break ;
+		case 'k':
+			if (!set)
+			{
+				target->DelMode('k');
+				break ;
+			}
+			if (i + 1 >= params.size())
+			{
+				(*client) << "Syntax error\n";
+				break ;
+			}
+			if (params[i + 1].empty() || params[i
+				+ 1].find(' ') == std::string::npos)
+			{
+				(*client) << "Invalid mode parameter\n";
+				break ;
+			}
+			target->DelMode('k');
+			target->setKey(params[i + 1]);
+			target->AddMode('k');
+			break ;
+		case 'l':
+			if (!set)
+			{
+				target->DelMode('l');
+				break ;
+			}
+			if (i + 1 >= params.size())
+			{
+				(*client) << "Syntax error\n";
+				break ;
+			}
+			long l(std::atol(params[i + 1].c_str()));
+			if (l <= 0 || l >= 0xFFFF)
+			{
+				(*client) << "Invalid mode parameter\n";
+				break ;
+			}
+			target->DelMode('l');
+			target->setMaxUsers(l);
+			target->AddMode('l');
+			break ;
+		}
+	}
+}
+
 bool Channel::Join(Client *client, const std::string &name)
 {
 	if (!IsValidName(name))
@@ -170,4 +282,40 @@ void Channel::Part(Client *client, const std::string &name,
 	}
 	Membership::Remove(client, channel);
 	Log::Info() << "User " << client->getNick() << " left channel " << name << " (" << reason << ")\n";
+}
+
+void Channel::Kick(Client *client, const std::string &nick,
+	const std::string &channel, const std::string &reason)
+{
+	Client *target(Client::Search(nick));
+	if (!target)
+	{
+		(*client) << nick << " :No such nick or channel name\n";
+		return ;
+	}
+	Channel *chan(Channel::Search(channel));
+	if (!chan)
+	{
+		(*client) << channel << " :No such channel\n";
+		return ;
+	}
+	Membership *member(Membership::Get(client, chan));
+	if (!member)
+	{
+		(*client) << nick << " :You are not on that channel\n";
+		return ;
+	}
+	Membership *target_member(Membership::Get(target, chan));
+	if (!target_member)
+	{
+		(*client) << nick << " :They aren't on that channel\n";
+		return ;
+	}
+	if (!member->HasMode('o'))
+	{
+		(*client) << nick << " :Your privileges are too low\n";
+		return ;
+	}
+	Membership::Remove(target, chan);
+	Log::Info() << "User " << nick << " was kicked from channel " << channel << " by " << client->getNick() << " (" << reason << ")\n";
 }

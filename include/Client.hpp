@@ -9,6 +9,7 @@
 # include <sstream>
 # include <string>
 # include <unistd.h>
+# include <vector>
 
 class Client
 {
@@ -46,6 +47,8 @@ class Client
 	static void Exit(void);
 	static bool IsValidNick(const std::string &nick);
 	static Client *Search(const std::string &nick);
+	static void Mode(Client *client, std::vector<std::string> &params,
+		Client *target);
 	static void Destroy(Client *client);
 
   private:
