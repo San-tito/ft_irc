@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/18 20:10:24 by tuta             ###   ########.fr       */
+/*   Updated: 2025/03/18 20:26:28 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,7 +38,8 @@
 # define MAX_NICK_LEN 9
 # define MAX_COMMANDS 3
 
-#define ERR_NOSUCHNICK_MSG "401 " + client->getNick() + " " + params[0] + " :No such nick or channel name"
+#define ERR_NOSUCHNICK(nick, channel)  \
+    "401 " + (nick) + " " + (channel) + " :No such nick or channel name"
 
 class	Channel;
 class	Membership;

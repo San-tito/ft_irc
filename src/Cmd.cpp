@@ -81,7 +81,7 @@ void Cmd::Invite(Client *client, std::vector<std::string> params)
 	Client *target(Client::Search(params[0]));
 	if (!target)
 	{
-		(*client) << "No such nick or channel name\n";
+		client->WriteErr(ERR_NOSUCHNICK(client->getNick(), params[0]));
 		return ;
 	}
 	Channel *chan(Channel::Search(params[1]));
@@ -228,7 +228,7 @@ void Cmd::Mode(Client *client, std::vector<std::string> params)
 	if (chan)
 		return (Channel::Mode(client, params, chan));
 	if (is_valid_nick)
-		(*client) << "No such nick or channel name\n";
+		client->WriteErr(ERR_NOSUCHNICK(client->getNick(), params[0]));
 	else
 		(*client) << "No such channel\n";
 }
@@ -301,8 +301,8 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 			chan->Write(client, std::string(":") + client->getNick()
 				+ " PRIVMSG " + target + " :" + params[1]);
 		else
-		  client->WriteErr(ERR_NOSUCHNICK_MSG);
-			//(*client) << ":" << client->getNick() << " "<< params[0] << " :No such nick or channel name\n";
+			client->WriteErr(ERR_NOSUCHNICK(client->getNick(), target));
+		//(*client) << ":" << client->getNick() << " "<< params[0] << " :No such nick or channel name\n";
 	}
 }
 
@@ -349,8 +349,9 @@ void Cmd::Nick(Client *client, std::vector<std::string> params)
 	else
 	{
 		Log::Info() << "Connection " << client->getFd() << ": changed nickname to " << params[0];
-		(*client) << ":" << client->getNick()<< " NICK :" << params[0] << "\n";
-		client->Write(std::string(":") + client->getNick() + " NICK :" + params[0] + '\n');
+		(*client) << ":" << client->getNick() << " NICK :" << params[0] << "\n";
+		client->Write(std::string(":") + client->getNick() + " NICK :"
+			+ params[0] + '\n');
 		client->setNick(params[0]);
 	}
 }
