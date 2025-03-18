@@ -44,6 +44,8 @@ class Client
 	void unsetEvent(short event);
 	void unsetReadBuffer(void);
 	void unsetWriteBuffer(void);
+	void Write(const std::string &message);
+	void WriteErr(const std::string &message);
 	static void Exit(void);
 	static bool IsValidNick(const std::string &nick);
 	static Client *Search(const std::string &nick);

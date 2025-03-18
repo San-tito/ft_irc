@@ -299,9 +299,10 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 			(*dest) << ":" << client->getNick() << " PRIVMSG " << target << " :" << params[1] << '\n';
 		else if ((chan = Channel::Search(target)))
 			chan->Write(client, std::string(":") + client->getNick()
-				+ " PRIVMSG " + target + " :" + params[1] + '\n');
+				+ " PRIVMSG " + target + " :" + params[1]);
 		else
-			(*client) << "No such nick or channel name\n";
+		  client->WriteErr(ERR_NOSUCHNICK_MSG);
+			//(*client) << ":" << client->getNick() << " "<< params[0] << " :No such nick or channel name\n";
 	}
 }
 
@@ -348,8 +349,9 @@ void Cmd::Nick(Client *client, std::vector<std::string> params)
 	else
 	{
 		Log::Info() << "Connection " << client->getFd() << ": changed nickname to " << params[0];
+		(*client) << ":" << client->getNick()<< " NICK :" << params[0] << "\n";
+		client->Write(std::string(":") + client->getNick() + " NICK :" + params[0] + '\n');
 		client->setNick(params[0]);
-		(*client) << "NICK: " << client->getNick() << '\n';
 	}
 }
 

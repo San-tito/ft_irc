@@ -86,7 +86,7 @@ void Channel::Write(Client *client, const std::string &message)
 	while (it != Server::memberships.end())
 	{
 		if ((*it)->getChannel() == this && (*it)->getClient() != client)
-			(*(*it)->getClient()) << message;
+			(*it)->getClient()->Write(message);
 		++it;
 	}
 }

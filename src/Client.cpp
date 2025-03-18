@@ -176,3 +176,13 @@ void Client::Destroy(Client *client)
 		++it;
 	}
 }
+
+void Client::Write(const std::string &message)
+{
+	this->wbuffer_ += ":" + nick_ + " " + message + '\n';
+}
+
+void Client::WriteErr(const std::string &message)
+{
+	this->wbuffer_ += ": " + message + '\n';
+}
