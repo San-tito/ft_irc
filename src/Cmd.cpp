@@ -1,4 +1,5 @@
 #include "Cmd.hpp"
+#include "Server.hpp"
 
 std::map<std::string, void (*)(Client *,
 	std::vector<std::string>)> Cmd::commands;
@@ -22,17 +23,18 @@ static bool	ValidateRegister(Client *client)
 {
 	if (!client->isRegistered())
 	{
-		(*client) << "Connection not registered\n";
+		client->WriteErr(ERR_NOTREGISTERED(client->getNick()));
 		return (false);
 	}
 	return (true);
 }
 
-static bool	ValidateParams(Client *client, int min, int max, int argc)
+static bool	ValidateParams(Client *client, int min, int max, int argc,
+		std::string const &cmd)
 {
 	if (argc < min || (max != -1 && argc > max))
 	{
-		(*client) << "Syntax error\n";
+		client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), cmd));
 		return (false);
 	}
 	return (true);
@@ -43,17 +45,17 @@ static bool	JoinAllowed(Client *client, Channel *chan, std::string key)
 	bool is_invited(chan->IsInvited(client));
 	if (chan->HasMode('i') && !is_invited)
 	{
-		(*client) << "Cannot join channel (+i) -- Invited users only\n";
+		client->WriteErr(ERR_INVITEONLYCHAN(client->getNick(), chan->getName()));
 		return (false);
 	}
 	if (chan->HasMode('k') && chan->getKey() != key)
 	{
-		(*client) << "Cannot join channel (+k) -- Wrong channel key\n";
+		client->WriteErr(ERR_BADCHANNELKEY(client->getNick(), chan->getName()));
 		return (false);
 	}
 	if (chan->HasMode('l') && chan->getMaxUsers() <= Channel::MemberCount(chan))
 	{
-		(*client) << "Cannot join channel (+l) -- Channel is full, try later\n";
+		client->WriteErr(ERR_CHANNELISFULL(client->getNick(), chan->getName()));
 		return (false);
 	}
 	return (true);
@@ -69,14 +71,14 @@ static void	LoginUser(Client *client)
 	}
 	client->setRegistered(true);
 	Log::Info() << "User \"" << client->getNick() << "\" registered (connection " << client->getFd() << ").";
-	(*client) << client->getNick() << " :Welcome to the jungle!\n";
+	client->WriteErr(RPL_WELCOME(client->getNick()));
 }
 
 void Cmd::Invite(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 2, 2, params.size()))
+	if (!ValidateParams(client, 2, 2, params.size(), "INVITE"))
 		return ;
 	Client *target(Client::Search(params[0]));
 	if (!target)
@@ -90,30 +92,30 @@ void Cmd::Invite(Client *client, std::vector<std::string> params)
 		Membership *member(Membership::Get(client, chan));
 		if (!member)
 		{
-			(*client) << "You are not on that channel\n";
+			client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), params[1]));
 			return ;
 		}
 		if (chan->HasMode('i') && !member->HasMode('o'))
 		{
-			(*client) << "You are not channel operator\n";
+			client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(), params[1]));
 			return ;
 		}
 		else
 			chan->AddInvite(target);
 	}
 	Log::Info() << "User " << client->getNick() << " invites " << params[0] << " to " << params[1];
-	(*target) << ":" << client->getNick() << " INVITE " << params[0] << " " << params[1] << '\n';
+	target->Write("INVITE " + params[0] + " " + params[1]);
 }
 
 void Cmd::Join(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 1, 2, params.size()))
+	if (!ValidateParams(client, 1, 2, params.size(), "JOIN"))
 		return ;
 	if (params[0].empty())
 	{
-		(*client) << "Syntax error\n";
+		client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "JOIN"));
 		return ;
 	}
 	if (params.size() == 1 && params[0] == "0")
@@ -154,9 +156,8 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 		}
 		if (op)
 			is_member->AddMode('o');
-		chan->Write(client, std::string(":") + client->getNick() + " JOIN :"
-			+ chan->getName() + '\n');
-		(*client) << ":" << client->getNick() << " JOIN :" << chan->getName() << '\n';
+		chan->Write(client, "JOIN :" + chan->getName());
+		client->Write("JOIN :" + chan->getName());
 		if (params.size() > 1)
 			std::getline(key_ss, key, ',');
 	}
@@ -166,7 +167,7 @@ void Cmd::Kick(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 2, 3, params.size()))
+	if (!ValidateParams(client, 2, 3, params.size(), "KICK"))
 		return ;
 	unsigned int channel_count(0);
 	unsigned int nick_count(0);
@@ -206,14 +207,14 @@ void Cmd::Kick(Client *client, std::vector<std::string> params)
 		}
 	}
 	else
-		(*client) << "Syntax error\n";
+		client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "KICK"));
 }
 
 void Cmd::Mode(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 1, -1, params.size()))
+	if (!ValidateParams(client, 1, -1, params.size(), "MODE"))
 		return ;
 	Client *cl(0);
 	Channel *chan(0);
@@ -230,20 +231,17 @@ void Cmd::Mode(Client *client, std::vector<std::string> params)
 	if (is_valid_nick)
 		client->WriteErr(ERR_NOSUCHNICK(client->getNick(), params[0]));
 	else
-		(*client) << "No such channel\n";
+		client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), params[0]));
 }
 
 void Cmd::Part(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 1, 2, params.size()))
+	if (!ValidateParams(client, 1, 2, params.size(), "PART"))
 		return ;
 	if (params[0].empty())
-	{
-		(*client) << "Syntax error\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "PART")));
 	std::string chan;
 	std::stringstream ss(params[0]);
 	while (std::getline(ss, chan, ','))
@@ -254,7 +252,7 @@ void Cmd::Quit(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 0, 1, params.size()))
+	if (!ValidateParams(client, 0, 1, params.size(), "QUIT"))
 		return ;
 	if (params.size() == 1)
 		Log::Info() << client->getNick() << ": " << params[0];
@@ -266,22 +264,13 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 	if (!ValidateRegister(client))
 		return ;
 	if (params.size() == 0)
-	{
-		(*client) << "No recipient given\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NORECIPIENT(client->getNick(), "PRIVMSG")));
 	else if (params.size() == 1)
-	{
-		(*client) << "No text to send\n";
-		return ;
-	}
-	else if (!ValidateParams(client, 2, 2, params.size()))
+		return (client->WriteErr(ERR_NOTEXTTOSEND(client->getNick())));
+	else if (!ValidateParams(client, 2, 2, params.size(), "PRIVMSG"))
 		return ;
 	else if (params[0].empty())
-	{
-		(*client) << "No text to send\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOTEXTTOSEND(client->getNick())));
 	std::string target;
 	std::stringstream ss(params[0]);
 	while (std::getline(ss, target, ','))
@@ -296,19 +285,18 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 			dest = Client::Search(nick);
 		}
 		if (dest)
-			(*dest) << ":" << client->getNick() << " PRIVMSG " << target << " :" << params[1] << '\n';
+		  dest->Write("PRIVMSG " + target + " :" + params[1]);
 		else if ((chan = Channel::Search(target)))
 			chan->Write(client, std::string(":") + client->getNick()
 				+ " PRIVMSG " + target + " :" + params[1]);
 		else
 			client->WriteErr(ERR_NOSUCHNICK(client->getNick(), target));
-		//(*client) << ":" << client->getNick() << " "<< params[0] << " :No such nick or channel name\n";
 	}
 }
 
 void Cmd::Pass(Client *client, std::vector<std::string> params)
 {
-	if (!ValidateParams(client, 1, 1, params.size()))
+	if (!ValidateParams(client, 1, 1, params.size(), "PASS"))
 		return ;
 	if (client->getPassword().empty())
 	{
@@ -316,26 +304,28 @@ void Cmd::Pass(Client *client, std::vector<std::string> params)
 		client->setPassword(params[0]);
 	}
 	else
-		(*client) << "Password already registered\n";
+		client->WriteErr(ERR_ALREADYREGISTRED(client->getNick()));
 }
 
 void Cmd::Nick(Client *client, std::vector<std::string> params)
 {
-	if (!ValidateParams(client, 1, 1, params.size()))
+	if (!ValidateParams(client, 1, 1, params.size(), "NICK"))
 		return ;
 	if (strcasecmp(client->getNick().c_str(), params[0].c_str()) != 0)
 	{
 		if (!Client::IsValidNick(params[0]))
 		{
 			if (params[0].size() > MAX_NICK_LEN)
-				(*client) << "Nickname too long\n";
+				client->WriteErr(ERR_NICKNAMETOOLONG(client->getNick(),
+						params[0]));
 			else
-				(*client) << "Erroneous nickname\n";
+				client->WriteErr(ERR_ERRONEUSNICKNAME(client->getNick(),
+						params[0]));
 			return ;
 		}
 		if (Client::Search(params[0]))
 		{
-			(*client) << "Nickname already in use\n";
+			client->WriteErr(ERR_NICKNAMEINUSE(client->getNick(), params[0]));
 			return ;
 		}
 	}
@@ -349,9 +339,7 @@ void Cmd::Nick(Client *client, std::vector<std::string> params)
 	else
 	{
 		Log::Info() << "Connection " << client->getFd() << ": changed nickname to " << params[0];
-		(*client) << ":" << client->getNick() << " NICK :" << params[0] << "\n";
-		client->Write(std::string(":") + client->getNick() + " NICK :"
-			+ params[0] + '\n');
+		client->Write(std::string("NICK :") + params[0]);
 		client->setNick(params[0]);
 	}
 }
@@ -360,27 +348,19 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
 		return ;
-	if (!ValidateParams(client, 1, 2, params.size()))
+	if (!ValidateParams(client, 1, 2, params.size(), "TOPIC"))
 		return ;
 	Channel *chan(Channel::Search(params[0]));
 	if (!chan)
-	{
-		(*client) << "No such channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), params[0])));
 	Membership *member(Membership::Get(client, chan));
 	if (!member)
-	{
-		(*client) << "You are not on that channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), params[0])));
 	if (params.size() == 1)
 	{
 		std::string topic(chan->getTopic());
 		if (topic.empty())
-		{
-			(*client) << "No topic is set\n";
-		}
+			client->WriteErr(RPL_NOTOPIC(client->getNick(), chan->getName()));
 		else
 		{
 			// (*client) << TOPIC_MSG // QA I NEED HELP
@@ -388,10 +368,7 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 		return ;
 	}
 	if (chan->HasMode('t') && !member->HasMode('o'))
-	{
-		(*client) << "You are not channel operator\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(), params[0])));
 	// if(params[1] != chan->getTopic())
 	// 	chan->Write(client, std::string(":") + client->getNick() + " TOPIC "
 	// + chan->getName() + " :" + params[1] + '\n');
@@ -403,11 +380,8 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 void Cmd::User(Client *client, std::vector<std::string> params)
 {
 	if (client->isRegistered())
-	{
-		(*client) << "Connection already registered\n";
-		return ;
-	}
-	if (!ValidateParams(client, 4, 4, params.size()))
+		return (client->WriteErr(ERR_ALREADYREGISTRED(client->getNick())));
+	if (!ValidateParams(client, 4, 4, params.size(), "USER"))
 		return ;
 	if (!client->getPassword().empty() || !client->getNick().empty())
 	{
@@ -422,5 +396,5 @@ void Cmd::User(Client *client, std::vector<std::string> params)
 			return (LoginUser(client));
 	}
 	else
-		(*client) << "Connection not registered\n";
+		client->WriteErr(ERR_NOTREGISTERED(client->getNick()));
 }

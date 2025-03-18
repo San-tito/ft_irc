@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/18 20:26:28 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/18 21:32:30 by tuta             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,23 @@
 
 #define ERR_NOSUCHNICK(nick, channel)  \
     "401 " + (nick) + " " + (channel) + " :No such nick or channel name"
+#define ERR_NICKNAMETOOLONG(nick, target)  \
+    "432 " + (nick) + " " + (target) + " :Nickname too long"
+#define ERR_ERRONEUSNICKNAME(nick, target) "432 " + (nick)+ " " + (target) +" :Erroneous nickname"
+#define ERR_NICKNAMEINUSE(nick, target) "433 " + (nick) + " " + (target) + " :Nickname already in use"
+#define ERR_NOTREGISTERED(nick) "451 " + (nick) + " :Connection not registered"
+#define ERR_ALREADYREGISTRED(nick) "462 " + (nick) +  " :Connection already registered"
+#define ERR_NEEDMOREPARAMS(nick, target) "461 " + ((nick).empty() ? "*" : nick ) + " " + (target) + " :Syntax error"
+#define ERR_CHANNELISFULL(nick, target) "471 "+ (nick) + " " + (target) + " :Cannot join channel (+l) -- Channel is full, try later"
+#define ERR_INVITEONLYCHAN(nick, target) "473 " + (nick) + " " + (target) + " :Cannot join channel (+i) -- Invited users only"
+#define ERR_BADCHANNELKEY(nick, target) "475 " + (nick) + " " + (target) + " :Cannot join channel (+k) -- Wrong channel key"
+#define RPL_WELCOME(nick) "001 " + (nick) + " :Welcome to the jungle " + (nick)
+#define ERR_NOTONCHANNEL(nick, target) "442 " + (nick) + " " + (target) + " :You are not on that channel"
+#define ERR_CHANOPRIVSNEEDED(nick, target) "482 " + (nick) + " " + (target) + " :You are not channel operator"
+#define ERR_NOSUCHCHANNEL(nick, target) "403 " + (nick) + " " + (target) + " :No such channel"
+#define ERR_NORECIPIENT(nick, target) "411 " + (nick) + " :No recipient given " + (target)
+#define ERR_NOTEXTTOSEND(nick) "412 " + (nick) + " :No text to send"
+#define RPL_NOTOPIC(nick, target) "331 " + (nick) + " " + (target) + " :No topic is set"
 
 class	Channel;
 class	Membership;
