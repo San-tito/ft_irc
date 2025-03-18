@@ -94,12 +94,12 @@ size_t Channel::MemberCount(const Channel *channel)
 	return (count);
 }
 
-void Channel::Write(Client *client, const std::string &message)
+void Channel::Write(Client *client, Channel *channel, const std::string &message)
 {
 	std::vector<Membership *>::iterator it(Server::memberships.begin());
 	while (it != Server::memberships.end())
 	{
-		if ((*it)->getChannel() == (*it)->getChannel()
+		if ((*it)->getChannel() == channel
 			&& (*it)->getClient() != client)
 			(*(*it)->getClient()) << message;
 		++it;

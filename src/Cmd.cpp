@@ -153,7 +153,9 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 		}
 		if (op)
 			is_member->AddMode('o');
-		chan->Write(client, std::string("JOIN ") + channame + '\n');
+		// :tuta!~tuta@localhost JOIN :#asdf
+		chan->Write(client, chan, (std::string(":") + client->getNick() + " JOIN :" + chan->getName() + '\n'));
+		(*client) << ":" << client->getNick() << " JOIN :" << chan->getName() << '\n';
 		if (params.size() > 1)
 			std::getline(key_ss, key, ',');
 	}
@@ -224,7 +226,7 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 		if (dest)
 			(*dest) << ":" << client->getNick() << " PRIVMSG " << target << " :" << params[1] << '\n';
 		else if ((chan = Channel::Search(target)))
-			chan->Write(client, std::string("PRIVMSG ") + target + " :"
+			Channel::Write(client, chan, std::string("PRIVMSG ") + target + " :"
 				+ params[1] + '\n');
 		else
 			(*client) << "No such nick or channel name\n";
