@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/18 21:32:30 by tuta             ###   ########.fr       */
+/*   Updated: 2025/03/18 21:53:48 by tuta             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,11 @@
 #define ERR_NORECIPIENT(nick, target) "411 " + (nick) + " :No recipient given " + (target)
 #define ERR_NOTEXTTOSEND(nick) "412 " + (nick) + " :No text to send"
 #define RPL_NOTOPIC(nick, target) "331 " + (nick) + " " + (target) + " :No topic is set"
+#define ERR_USERSDONTMATCH(nick) "502 " + (nick) + " :Can't set/get mode for other users"
+#define ERR_NOCHANMODES(nick, target) "477 " + (nick) + " " + (target) + " :Channel doesn't support modes"
+#define ERR_INVALIDMODEPARAM(nick, target, param) "696 " + (nick) + " " + (target) + " " + (param) + " * :Invalid mode parameter"
+#define ERR_USERNOTINCHANNEL(nick, target, param) "441 " + (nick) + " " + (target) + " " + (param) + " :They aren't on that channel"
+#define ERR_CHANOPPRIVTOOLOW(nick, target) "482 " + (nick) + " " + (target) + " :Your privileges are too low"
 
 class	Channel;
 class	Membership;

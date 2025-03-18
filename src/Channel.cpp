@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+#include "Server.hpp"
 
 Channel::Channel(const std::string &name) : name_(name), max_users_(0)
 {
@@ -141,25 +142,19 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 	Channel *target)
 {
 	if (target->getName()[0] == '+')
-	{
-		(*client) << target->getName() << " :Channel doesn't support modes\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOCHANMODES(client->getNick(), target->getName())));
 	if (params.size() <= 1)
 	{
-		std::set<char> modes(target->getModes());
-		(*client) << target->getName() << " :Modes: ";
-		for (std::set<char>::iterator it(modes.begin()); it != modes.end(); ++it)
-			(*client) << *it;
-		(*client) << "\n";
+		/* std::set<char> modes(target->getModes()); */
+		/* (*client) << target->getName() << " :Modes: "; */
+		/* for (std::set<char>::iterator it(modes.begin()); it != modes.end(); ++it) */
+		/* 	(*client) << *it; */
+		/* (*client) << "\n"; */
 		return ;
 	}
 	Membership *member(Membership::Get(client, target));
 	if (!member)
-	{
-		(*client) << target->getName() << " :You are not on that channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), target->getName())));
 	bool is_op(member->HasMode('o'));
 	for (size_t i = 1; i < params.size(); i++)
 	{
@@ -174,7 +169,7 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			mode = mode.substr(1);
 		if (!is_op)
 		{
-			(*client) << target->getName() << " :You are not channel operator\n";
+			client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(), target->getName()));
 			break ;
 		}
 		switch (mode[0])
@@ -191,13 +186,13 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			}
 			if (i + 1 >= params.size())
 			{
-				(*client) << "Syntax error\n";
+				client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "MODE"));
 				break ;
 			}
 			if (params[i + 1].empty() || params[i
 				+ 1].find(' ') == std::string::npos)
 			{
-				(*client) << "Invalid mode parameter\n";
+				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(), target->getName(), "k"));
 				break ;
 			}
 			target->DelMode('k');
@@ -212,13 +207,13 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			}
 			if (i + 1 >= params.size())
 			{
-				(*client) << "Syntax error\n";
+				client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "MODE"));
 				break ;
 			}
 			long l(std::atol(params[i + 1].c_str()));
 			if (l <= 0 || l >= 0xFFFF)
 			{
-				(*client) << "Invalid mode parameter\n";
+				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(), target->getName(), "l"));
 				break ;
 			}
 			target->DelMode('l');
@@ -233,7 +228,7 @@ bool Channel::Join(Client *client, const std::string &name)
 {
 	if (!IsValidName(name))
 	{
-		(*client) << name << " :No such channel\n";
+		client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), name));
 		return (false);
 	}
 	Channel *channel(Channel::Search(name));
@@ -270,16 +265,10 @@ void Channel::Part(Client *client, const std::string &name,
 {
 	Channel *channel(Channel::Search(name));
 	if (!channel)
-	{
-		(*client) << name << " :No such channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), name)));
 	Membership *membership(Membership::Get(client, channel));
 	if (membership == 0)
-	{
-		(*client) << name << " :You're not on that channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), name)));
 	Membership::Remove(client, channel);
 	Log::Info() << "User " << client->getNick() << " left channel " << name << " (" << reason << ")\n";
 }
@@ -289,33 +278,18 @@ void Channel::Kick(Client *client, const std::string &nick,
 {
 	Client *target(Client::Search(nick));
 	if (!target)
-	{
-		(*client) << nick << " :No such nick or channel name\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOSUCHNICK(client->getNick(), nick)));
 	Channel *chan(Channel::Search(channel));
 	if (!chan)
-	{
-		(*client) << channel << " :No such channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), channel)));
 	Membership *member(Membership::Get(client, chan));
 	if (!member)
-	{
-		(*client) << nick << " :You are not on that channel\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), channel)));
 	Membership *target_member(Membership::Get(target, chan));
 	if (!target_member)
-	{
-		(*client) << nick << " :They aren't on that channel\n";
-		return ;
-	}
+	  return (client->WriteErr(ERR_USERNOTINCHANNEL(client->getNick(), target->getNick(), channel)));
 	if (!member->HasMode('o'))
-	{
-		(*client) << nick << " :Your privileges are too low\n";
-		return ;
-	}
+		return (client->WriteErr(ERR_CHANOPPRIVTOOLOW(client->getNick(), channel)));
 	Membership::Remove(target, chan);
 	Log::Info() << "User " << nick << " was kicked from channel " << channel << " by " << client->getNick() << " (" << reason << ")\n";
 }
