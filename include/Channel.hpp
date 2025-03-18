@@ -24,8 +24,12 @@ class Channel
 	std::string getKey(void) const;
 	size_t getMaxUsers(void) const;
 	void AddMode(char mode);
+	bool HasMode(char mode) const;
+	void AddInvite(Client *client);
+	bool IsInvited(Client *client) const;
 	static void Exit(void);
 	static bool IsValidName(const std::string &name);
+	static size_t MemberCount(const Channel *channel);
 	static Channel *Search(const std::string &name);
 	static bool Join(Client *client, const std::string &name);
 	static void PartAll(Client *client);
@@ -38,6 +42,7 @@ class Channel
 	std::string topic_;
 	std::string key_;
 	size_t max_users_;
+	std::vector<Client *> invites_;
 };
 
 #endif /* CHANNEL_HPP */

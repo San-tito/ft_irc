@@ -5,13 +5,17 @@ std::map<std::string, void (*)(Client *,
 
 void Cmd::Init(void)
 {
+	commands["INVITE"] = Invite;
 	commands["JOIN"] = Join;
+	// commands["KICK"] = Kick;
+	// commands["MODE"] = Mode;
 	commands["NICK"] = Nick;
-	commands["PASS"] = Pass;
 	commands["PART"] = Part;
+	commands["PASS"] = Pass;
 	commands["PRIVMSG"] = Privmsg;
-	commands["USER"] = User;
 	commands["QUIT"] = Quit;
+	// commads["TOPIC"] = Topic;
+	commands["USER"] = User;
 }
 
 static bool	ValidateRegister(Client *client)
@@ -47,6 +51,60 @@ static void	LoginUser(Client *client)
 	(*client) << client->getNick() << " :Welcome to the jungle!\n";
 }
 
+void Cmd::Invite(Client *client, std::vector<std::string> params)
+{
+	if (!ValidateRegister(client))
+		return ;
+	if (!ValidateParams(client, 2, 2, params.size()))
+		return ;
+	Client *target(Client::Search(params[0]));
+	if (!target)
+	{
+		(*client) << "No such nick or channel name\n";
+		return ;
+	}
+	Channel *chan(Channel::Search(params[1]));
+	if (chan)
+	{
+		Membership *member(Membership::Get(client, chan));
+		if (!member)
+		{
+			(*client) << "You are not on that channel\n";
+			return ;
+		}
+		if (chan->HasMode('i') && !member->HasMode('o'))
+		{
+			(*client) << "You are not channel operator\n";
+			return ;
+		}
+		else
+			chan->AddInvite(target);
+	}
+	Log::Info() << "User " << client->getNick() << " invites " << params[0] << " to " << params[1];
+	(*target) << ":" << client->getNick() << " INVITE " << params[0] << " " << params[1] << '\n';
+}
+
+static bool	JoinAllowed(Client *client, Channel *chan, std::string key)
+{
+	bool is_invited(chan->IsInvited(client));
+	if (chan->HasMode('i') && !is_invited)
+	{
+		(*client) << "Cannot join channel (+i) -- Invited users only\n";
+		return (false);
+	}
+	if (chan->HasMode('k') && chan->getKey() != key)
+	{
+		(*client) << "Cannot join channel (+k) -- Wrong channel key\n";
+		return (false);
+	}
+	if (chan->HasMode('l') && chan->getMaxUsers() <= Channel::MemberCount(chan))
+	{
+		(*client) << "Cannot join channel (+l) -- Channel is full, try later\n";
+		return (false);
+	}
+	return (true);
+}
+
 void Cmd::Join(Client *client, std::vector<std::string> params)
 {
 	if (!ValidateRegister(client))
@@ -64,9 +122,16 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 		return ;
 	}
 	bool op(false);
+	std::string key;
 	std::string channame;
-	std::stringstream ss(params[0]);
-	while (std::getline(ss, channame, ','))
+	std::stringstream key_ss;
+	std::stringstream chan_ss(params[0]);
+	if (params.size() > 1)
+	{
+		key_ss.str(params[1]);
+		std::getline(key_ss, key, ',');
+	}
+	while (std::getline(chan_ss, channame, ','))
 	{
 		Channel *chan(Channel::Search(channame));
 		Membership *is_member(chan ? Membership::Get(client, chan) : 0);
@@ -74,8 +139,8 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 			continue ;
 		if (chan)
 		{
-			// if (!JoinAllowed(client, chan))
-			// 	continue ;
+			if (!JoinAllowed(client, chan, key))
+				continue ;
 		}
 		if (!chan && channame[0] != '+')
 			op = true;
@@ -89,6 +154,8 @@ void Cmd::Join(Client *client, std::vector<std::string> params)
 		if (op)
 			is_member->AddMode('o');
 		(*chan) << ":" << client->getNick() << " JOIN " << chan->getName() << '\n';
+		if (params.size() > 1)
+			std::getline(key_ss, key, ',');
 	}
 }
 

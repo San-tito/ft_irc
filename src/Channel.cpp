@@ -74,6 +74,28 @@ void Channel::AddMode(char mode)
 	modes_.insert(mode);
 }
 
+bool Channel::HasMode(char mode) const
+{
+	return (modes_.find(mode) != modes_.end());
+}
+
+void Channel::AddInvite(Client *client)
+{
+	invites_.push_back(client);
+}
+
+bool Channel::IsInvited(Client *client) const
+{
+	std::vector<Client *>::const_iterator it(invites_.begin());
+	while (it != invites_.end())
+	{
+		if (*it == client)
+			return (true);
+		++it;
+	}
+	return (false);
+}
+
 void Channel::Exit(void)
 {
 	std::vector<Channel *>::iterator it(Server::channels.begin());
@@ -93,6 +115,19 @@ bool Channel::IsValidName(const std::string &name)
 	if (name.size() > MAX_CHANNEL_LEN)
 		return (false);
 	return (true);
+}
+
+size_t Channel::MemberCount(const Channel *channel)
+{
+	size_t count(0);
+	std::vector<Membership *>::iterator it(Server::memberships.begin());
+	while (it != Server::memberships.end())
+	{
+		if ((*it)->getChannel() == channel)
+			++count;
+		++it;
+	}
+	return (count);
 }
 
 Channel *Channel::Search(const std::string &name)
@@ -131,7 +166,16 @@ bool Channel::Join(Client *client, const std::string &name)
 
 void Channel::PartAll(Client *client)
 {
-	(void)client;
+	std::vector<Membership *>::iterator it(Server::memberships.begin());
+	while (it != Server::memberships.end())
+	{
+		if ((*it)->getClient() == client)
+		{
+			Channel *channel((*it)->getChannel());
+			Part(client, channel->getName(), "");
+		}
+		++it;
+	}
 }
 
 void Channel::Part(Client *client, const std::string &name,
@@ -149,5 +193,6 @@ void Channel::Part(Client *client, const std::string &name,
 		(*client) << name << " :You're not on that channel\n";
 		return ;
 	}
-	(void)reason;
+	Membership::Remove(client, channel);
+	Log::Info() << "User " << client->getNick() << " left channel " << name << " (" << reason << ")\n";
 }

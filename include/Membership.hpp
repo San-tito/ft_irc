@@ -19,8 +19,10 @@ class Membership
 	Client *getClient(void);
 	Channel *getChannel(void);
 	void AddMode(char mode);
+	bool HasMode(char mode) const;
 	static void Exit(void);
 	static Membership *Get(Client *client, Channel *channel);
+	static void Remove(Client *client, Channel *channel);
 
   private:
 	Client *client_;

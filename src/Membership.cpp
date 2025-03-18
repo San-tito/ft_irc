@@ -24,6 +24,11 @@ void Membership::AddMode(char mode)
 	modes_.insert(mode);
 }
 
+bool Membership::HasMode(char mode) const
+{
+	return (modes_.find(mode) != modes_.end());
+}
+
 void Membership::Exit(void)
 {
 	std::vector<Membership *>::iterator it(Server::memberships.begin());
@@ -44,4 +49,19 @@ Membership *Membership::Get(Client *client, Channel *channel)
 		++it;
 	}
 	return (0);
+}
+
+void Membership::Remove(Client *client, Channel *channel)
+{
+	std::vector<Membership *>::iterator it(Server::memberships.begin());
+	while (it != Server::memberships.end())
+	{
+		if ((*it)->getClient() == client && (*it)->getChannel() == channel)
+		{
+			delete (*it);
+			Server::memberships.erase(it);
+			return ;
+		}
+		++it;
+	}
 }
