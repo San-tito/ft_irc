@@ -15,9 +15,6 @@ class Channel
   public:
 	Channel(const std::string &name);
 	~Channel(void);
-	Channel &operator<<(const char &message);
-	Channel &operator<<(const char *message);
-	Channel &operator<<(const std::string &message);
 	std::string getName(void) const;
 	std::set<char> getModes(void) const;
 	std::string getTopic(void) const;
@@ -30,6 +27,7 @@ class Channel
 	static void Exit(void);
 	static bool IsValidName(const std::string &name);
 	static size_t MemberCount(const Channel *channel);
+	static void Write(Client *client, const std::string &message);
 	static Channel *Search(const std::string &name);
 	static bool Join(Client *client, const std::string &name);
 	static void PartAll(Client *client);

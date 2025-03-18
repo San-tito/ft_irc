@@ -8,42 +8,6 @@ Channel::~Channel(void)
 {
 }
 
-Channel &Channel::operator<<(const char &message)
-{
-	std::vector<Client *>::iterator it(Server::clients.begin());
-	while (it != Server::clients.end())
-	{
-		if (Membership::Get(*it, this))
-			(*(*it)) << message;
-		++it;
-	}
-	return (*this);
-}
-
-Channel &Channel::operator<<(const char *message)
-{
-	std::vector<Client *>::iterator it(Server::clients.begin());
-	while (it != Server::clients.end())
-	{
-		if (Membership::Get(*it, this))
-			(*(*it)) << message;
-		++it;
-	}
-	return (*this);
-}
-
-Channel &Channel::operator<<(const std::string &message)
-{
-	std::vector<Client *>::iterator it(Server::clients.begin());
-	while (it != Server::clients.end())
-	{
-		if (Membership::Get(*it, this))
-			(*(*it)) << message;
-		++it;
-	}
-	return (*this);
-}
-
 std::string Channel::getName(void) const
 {
 	return (name_);
@@ -128,6 +92,18 @@ size_t Channel::MemberCount(const Channel *channel)
 		++it;
 	}
 	return (count);
+}
+
+void Channel::Write(Client *client, const std::string &message)
+{
+	std::vector<Membership *>::iterator it(Server::memberships.begin());
+	while (it != Server::memberships.end())
+	{
+		if ((*it)->getChannel() == (*it)->getChannel()
+			&& (*it)->getClient() != client)
+			(*(*it)->getClient()) << message;
+		++it;
+	}
 }
 
 Channel *Channel::Search(const std::string &name)
