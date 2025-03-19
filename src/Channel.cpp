@@ -87,7 +87,7 @@ void Channel::Write(Client *client, const std::string &message)
 	while (it != Server::memberships.end())
 	{
 		if ((*it)->getChannel() == this && (*it)->getClient() != client)
-			(*it)->getClient()->Write(client->getNick(), message);
+			(*it)->getClient()->Write(client->getPrefix(), message);
 		++it;
 	}
 }
@@ -142,7 +142,8 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 	Channel *target)
 {
 	if (target->getName()[0] == '+')
-		return (client->WriteErr(ERR_NOCHANMODES(client->getNick(), target->getName())));
+		return (client->WriteErr(ERR_NOCHANMODES(client->getNick(),
+					target->getName())));
 	if (params.size() <= 1)
 	{
 		/* std::set<char> modes(target->getModes()); */
@@ -154,7 +155,8 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 	}
 	Membership *member(Membership::Get(client, target));
 	if (!member)
-		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), target->getName())));
+		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(),
+					target->getName())));
 	bool is_op(member->HasMode('o'));
 	for (size_t i = 1; i < params.size(); i++)
 	{
@@ -169,7 +171,8 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			mode = mode.substr(1);
 		if (!is_op)
 		{
-			client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(), target->getName()));
+			client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(),
+					target->getName()));
 			break ;
 		}
 		switch (mode[0])
@@ -192,7 +195,8 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			if (params[i + 1].empty() || params[i
 				+ 1].find(' ') == std::string::npos)
 			{
-				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(), target->getName(), "k"));
+				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(),
+						target->getName(), "k"));
 				break ;
 			}
 			target->DelMode('k');
@@ -213,7 +217,8 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			long l(std::atol(params[i + 1].c_str()));
 			if (l <= 0 || l >= 0xFFFF)
 			{
-				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(), target->getName(), "l"));
+				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(),
+						target->getName(), "l"));
 				break ;
 			}
 			target->DelMode('l');
@@ -283,15 +288,18 @@ void Channel::Kick(Client *client, const std::string &nick,
 		return (client->WriteErr(ERR_NOSUCHNICK(client->getNick(), nick)));
 	Channel *chan(Channel::Search(channel));
 	if (!chan)
-		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), channel)));
+		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(),
+					channel)));
 	Membership *member(Membership::Get(client, chan));
 	if (!member)
 		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), channel)));
 	Membership *target_member(Membership::Get(target, chan));
 	if (!target_member)
-	  return (client->WriteErr(ERR_USERNOTINCHANNEL(client->getNick(), target->getNick(), channel)));
+		return (client->WriteErr(ERR_USERNOTINCHANNEL(client->getNick(),
+					target->getNick(), channel)));
 	if (!member->HasMode('o'))
-		return (client->WriteErr(ERR_CHANOPPRIVTOOLOW(client->getNick(), channel)));
+		return (client->WriteErr(ERR_CHANOPPRIVTOOLOW(client->getNick(),
+					channel)));
 	Membership::Remove(target, chan);
 	Log::Info() << "User " << nick << " was kicked from channel " << channel << " by " << client->getNick() << " (" << reason << ")\n";
 }

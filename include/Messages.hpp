@@ -1,7 +1,7 @@
 #ifndef MESSAGES_HPP
 # define MESSAGES_HPP
 
-# define RPL_WELCOME(nick, user) "001 " + (nick) + " :Welcome to the Internet Relay Network " + (nick) + "!" + (user)
+# define RPL_WELCOME(nick, user, host) "001 " + (nick) + " :Welcome to the Internet Relay Network " + (nick) + "!" + (user) + "@" + (host)
 # define RPL_YOURHOST(nick, servername, version) "002 " + (nick) + " :Your host is " + (servername) + ", running version " + (version)
 # define RPL_CREATED(nick, date) "003 " + (nick) + " :This server was created " + (date)
 # define RPL_MYINFO(nick, servername, version, channel_modes) "004 " + (nick) + " " + (servername) + " " + (version) + " " + (channel_modes)

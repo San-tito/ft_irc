@@ -25,6 +25,7 @@ class Client
 	std::string getPassword(void) const;
 	std::string getReadBuffer(void) const;
 	std::string getWriteBuffer(void) const;
+	std::string getPrefix(void) const;
 	void setFd(int fd);
 	void setLastTime(time_t last_time);
 	void setRegistered(bool registered);
@@ -38,7 +39,7 @@ class Client
 	void unsetReadBuffer(void);
 	void unsetWriteBuffer(void);
 	void Write(const std::string &message);
-    void Write(const std::string prefix, const std::string &message);
+	void Write(const std::string prefix, const std::string &message);
 	void WriteErr(const std::string &message);
 	void WriteRpl(const std::string &message);
 	static void Exit(void);

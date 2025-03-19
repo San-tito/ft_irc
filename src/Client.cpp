@@ -172,9 +172,14 @@ void Client::Destroy(Client *client)
 	}
 }
 
+std::string Client::getPrefix(void) const
+{
+	return (nick_ + "!" + user_ + "@unknown");
+}
+
 void Client::Write(const std::string &message)
 {
-	this->wbuffer_ += ":" + nick_ + " " + message + '\n';
+	this->wbuffer_ += ":" + getPrefix() + " " + message + '\n';
 }
 
 void Client::Write(const std::string prefix, const std::string &message)

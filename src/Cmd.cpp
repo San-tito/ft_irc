@@ -72,7 +72,8 @@ static void	LoginUser(Client *client)
 	}
 	client->setRegistered(true);
 	Log::Info() << "User \"" << client->getNick() << "\" registered (connection " << client->getFd() << ").";
-	client->WriteRpl(RPL_WELCOME(client->getNick(), client->getUser()));
+	client->WriteRpl(RPL_WELCOME(client->getNick(), client->getUser(),
+			"unknown"));
 	client->WriteRpl(RPL_YOURHOST(client->getNick(), "*", "irc-0.0.1"));
 	client->WriteRpl(RPL_CREATED(client->getNick(), Server::getTime()));
 	client->WriteRpl(RPL_MYINFO(client->getNick(), "*", "irc-0.0.1", "iklot"));
