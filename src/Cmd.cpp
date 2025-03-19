@@ -45,7 +45,8 @@ static bool	JoinAllowed(Client *client, Channel *chan, std::string key)
 	bool is_invited(chan->IsInvited(client));
 	if (chan->HasMode('i') && !is_invited)
 	{
-		client->WriteErr(ERR_INVITEONLYCHAN(client->getNick(), chan->getName()));
+		client->WriteErr(ERR_INVITEONLYCHAN(client->getNick(),
+				chan->getName()));
 		return (false);
 	}
 	if (chan->HasMode('k') && chan->getKey() != key)
@@ -97,7 +98,8 @@ void Cmd::Invite(Client *client, std::vector<std::string> params)
 		}
 		if (chan->HasMode('i') && !member->HasMode('o'))
 		{
-			client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(), params[1]));
+			client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(),
+					params[1]));
 			return ;
 		}
 		else
@@ -241,7 +243,8 @@ void Cmd::Part(Client *client, std::vector<std::string> params)
 	if (!ValidateParams(client, 1, 2, params.size(), "PART"))
 		return ;
 	if (params[0].empty())
-		return (client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "PART")));
+		return (client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(),
+					"PART")));
 	std::string chan;
 	std::stringstream ss(params[0]);
 	while (std::getline(ss, chan, ','))
@@ -264,7 +267,8 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 	if (!ValidateRegister(client))
 		return ;
 	if (params.size() == 0)
-		return (client->WriteErr(ERR_NORECIPIENT(client->getNick(), "PRIVMSG")));
+		return (client->WriteErr(ERR_NORECIPIENT(client->getNick(),
+					"PRIVMSG")));
 	else if (params.size() == 1)
 		return (client->WriteErr(ERR_NOTEXTTOSEND(client->getNick())));
 	else if (!ValidateParams(client, 2, 2, params.size(), "PRIVMSG"))
@@ -285,10 +289,10 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 			dest = Client::Search(nick);
 		}
 		if (dest)
-		  dest->Write("PRIVMSG " + target + " :" + params[1]);
+			dest->Write("PRIVMSG " + target + " :" + params[1]);
 		else if ((chan = Channel::Search(target)))
-			chan->Write(client, std::string(":") + client->getNick()
-				+ " PRIVMSG " + target + " :" + params[1]);
+			chan->Write(client, ":" + client->getNick() + " PRIVMSG " + target
+				+ " :" + params[1]);
 		else
 			client->WriteErr(ERR_NOSUCHNICK(client->getNick(), target));
 	}
@@ -339,7 +343,7 @@ void Cmd::Nick(Client *client, std::vector<std::string> params)
 	else
 	{
 		Log::Info() << "Connection " << client->getFd() << ": changed nickname to " << params[0];
-		client->Write(std::string("NICK :") + params[0]);
+		client->Write("NICK :" + params[0]);
 		client->setNick(params[0]);
 	}
 }
@@ -352,10 +356,12 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 		return ;
 	Channel *chan(Channel::Search(params[0]));
 	if (!chan)
-		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(), params[0])));
+		return (client->WriteErr(ERR_NOSUCHCHANNEL(client->getNick(),
+					params[0])));
 	Membership *member(Membership::Get(client, chan));
 	if (!member)
-		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), params[0])));
+		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(),
+					params[0])));
 	if (params.size() == 1)
 	{
 		std::string topic(chan->getTopic());
@@ -368,12 +374,13 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 		return ;
 	}
 	if (chan->HasMode('t') && !member->HasMode('o'))
-		return (client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(), params[0])));
+		return (client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(),
+					params[0])));
 	// if(params[1] != chan->getTopic())
-	// 	chan->Write(client, std::string(":") + client->getNick() + " TOPIC "
+	// 	chan->Write(client, ":" + client->getNick() + " TOPIC "
 	// + chan->getName() + " :" + params[1] + '\n');
 	chan->setTopic(params[1]);
-	// client->Write(std::string(":") + client->getNick() + " TOPIC "
+	// client->Write(":" + client->getNick() + " TOPIC "
 	// + chan->getName() + " :" + params[1] + '\n');
 }
 
