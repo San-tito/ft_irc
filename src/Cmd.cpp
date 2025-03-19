@@ -295,8 +295,7 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 		if (dest)
 			dest->Write("PRIVMSG " + target + " :" + params[1]);
 		else if ((chan = Channel::Search(target)))
-			chan->Write(client, ":" + client->getNick() + " PRIVMSG " + target
-				+ " :" + params[1]);
+			chan->Write(client, "PRIVMSG " + target + " :" + params[1]);
 		else
 			client->WriteErr(ERR_NOSUCHNICK(client->getNick(), target));
 	}
