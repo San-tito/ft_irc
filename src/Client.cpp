@@ -177,6 +177,11 @@ void Client::Write(const std::string &message)
 	this->wbuffer_ += ":" + nick_ + " " + message + '\n';
 }
 
+void Client::Write(const std::string prefix, const std::string &message)
+{
+	this->wbuffer_ += ":" + prefix + " " + message + '\n';
+}
+
 void Client::WriteErr(const std::string &message)
 {
 	this->wbuffer_ += ": " + message + '\n';

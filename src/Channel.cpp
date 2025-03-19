@@ -87,7 +87,7 @@ void Channel::Write(Client *client, const std::string &message)
 	while (it != Server::memberships.end())
 	{
 		if ((*it)->getChannel() == this && (*it)->getClient() != client)
-			(*it)->getClient()->Write(message);
+			(*it)->getClient()->Write(client->getNick(), message);
 		++it;
 	}
 }
@@ -270,6 +270,8 @@ void Channel::Part(Client *client, const std::string &name,
 	if (membership == 0)
 		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), name)));
 	Membership::Remove(client, channel);
+	channel->Write(client, "PART " + channel->getName() + " :" + reason);
+	client->Write("PART " + name + " :" + reason);
 	Log::Info() << "User " << client->getNick() << " left channel " << name << " (" << reason << ")\n";
 }
 

@@ -38,6 +38,7 @@ class Client
 	void unsetReadBuffer(void);
 	void unsetWriteBuffer(void);
 	void Write(const std::string &message);
+    void Write(const std::string prefix, const std::string &message);
 	void WriteErr(const std::string &message);
 	void WriteRpl(const std::string &message);
 	static void Exit(void);
