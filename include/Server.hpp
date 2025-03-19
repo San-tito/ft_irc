@@ -21,6 +21,7 @@
 # include "Membership.hpp"
 # include "Parser.hpp"
 # include "Sig.hpp"
+# include "Messages.hpp"
 # include <algorithm>
 # include <arpa/inet.h>
 # include <cstring>
@@ -37,31 +38,6 @@
 # define MAX_CHANNEL_LEN 50
 # define MAX_NICK_LEN 9
 # define MAX_COMMANDS 3
-
-#define ERR_NOSUCHNICK(nick, channel)  \
-    "401 " + (nick) + " " + (channel) + " :No such nick or channel name"
-#define ERR_NICKNAMETOOLONG(nick, target)  \
-    "432 " + (nick) + " " + (target) + " :Nickname too long"
-#define ERR_ERRONEUSNICKNAME(nick, target) "432 " + (nick)+ " " + (target) +" :Erroneous nickname"
-#define ERR_NICKNAMEINUSE(nick, target) "433 " + (nick) + " " + (target) + " :Nickname already in use"
-#define ERR_NOTREGISTERED(nick) "451 " + (nick) + " :Connection not registered"
-#define ERR_ALREADYREGISTRED(nick) "462 " + (nick) +  " :Connection already registered"
-#define ERR_NEEDMOREPARAMS(nick, target) "461 " + ((nick).empty() ? "*" : nick ) + " " + (target) + " :Syntax error"
-#define ERR_CHANNELISFULL(nick, target) "471 "+ (nick) + " " + (target) + " :Cannot join channel (+l) -- Channel is full, try later"
-#define ERR_INVITEONLYCHAN(nick, target) "473 " + (nick) + " " + (target) + " :Cannot join channel (+i) -- Invited users only"
-#define ERR_BADCHANNELKEY(nick, target) "475 " + (nick) + " " + (target) + " :Cannot join channel (+k) -- Wrong channel key"
-#define RPL_WELCOME(nick) "001 " + (nick) + " :Welcome to the jungle " + (nick)
-#define ERR_NOTONCHANNEL(nick, target) "442 " + (nick) + " " + (target) + " :You are not on that channel"
-#define ERR_CHANOPRIVSNEEDED(nick, target) "482 " + (nick) + " " + (target) + " :You are not channel operator"
-#define ERR_NOSUCHCHANNEL(nick, target) "403 " + (nick) + " " + (target) + " :No such channel"
-#define ERR_NORECIPIENT(nick, target) "411 " + (nick) + " :No recipient given " + (target)
-#define ERR_NOTEXTTOSEND(nick) "412 " + (nick) + " :No text to send"
-#define RPL_NOTOPIC(nick, target) "331 " + (nick) + " " + (target) + " :No topic is set"
-#define ERR_USERSDONTMATCH(nick) "502 " + (nick) + " :Can't set/get mode for other users"
-#define ERR_NOCHANMODES(nick, target) "477 " + (nick) + " " + (target) + " :Channel doesn't support modes"
-#define ERR_INVALIDMODEPARAM(nick, target, param) "696 " + (nick) + " " + (target) + " " + (param) + " * :Invalid mode parameter"
-#define ERR_USERNOTINCHANNEL(nick, target, param) "441 " + (nick) + " " + (target) + " " + (param) + " :They aren't on that channel"
-#define ERR_CHANOPPRIVTOOLOW(nick, target) "482 " + (nick) + " " + (target) + " :Your privileges are too low"
 
 class	Channel;
 class	Membership;
