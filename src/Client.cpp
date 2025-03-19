@@ -165,6 +165,7 @@ void Client::Destroy(Client *client)
 		{
 			Log::Info() << "Shutting down connection " << (*it)->getFd() << " ...";
 			close((*it)->getFd());
+			delete (*it);
 			Server::clients.erase(it);
 			break ;
 		}
