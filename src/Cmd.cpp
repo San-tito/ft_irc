@@ -72,7 +72,7 @@ static void	LoginUser(Client *client)
 	}
 	client->setRegistered(true);
 	Log::Info() << "User \"" << client->getNick() << "\" registered (connection " << client->getFd() << ").";
-	client->WriteErr(RPL_WELCOME(client->getNick()));
+	client->WriteErr(RPL_WELCOME(client->getNick(), client->getUser()));
 }
 
 void Cmd::Invite(Client *client, std::vector<std::string> params)

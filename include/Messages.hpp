@@ -5,6 +5,7 @@
 # define RPL_YOURHOST(servername, version) "002 :Your host is " + (servername) + ", running version " + (version)
 # define RPL_CREATED(date) "003 :This server was created " + (date)
 # define RPL_MYINFO(servername, version, user_modes, channel_modes) "004 " + (servername) + " " + (version) + " " + (user_modes) + " " + (channel_modes)
+# define RPL_NOTOPIC(nick, target) "331 " + (nick) + " " + (target) + " :No topic is set"
 
 # define ERR_NOSUCHNICK(nick, channel)  "401 " + (nick) + " " + (channel) + " :No such nick or channel name"
 # define ERR_NOSUCHCHANNEL(nick, target) "403 " + (nick) + " " + (target) + " :No such channel"
@@ -15,6 +16,7 @@
 # define ERR_NICKNAMEINUSE(nick, target) "433 " + (nick) + " " + (target) + " :Nickname already in use"
 # define ERR_NOTONCHANNEL(nick, target) "442 " + (nick) + " " + (target) + " :You are not on that channel"
 # define ERR_USERNOTINCHANNEL(nick, target, param) "441 " + (nick) + " " + (target) + " " + (param) + " :They aren't on that channel"
+#define ERR_NOTREGISTERED(nick) "451 " + (nick) + " :Connection not registered"
 # define ERR_NEEDMOREPARAMS(nick, target) "461 " + ((nick).empty() ? "*" : nick ) + " " + (target) + " :Syntax error"
 # define ERR_ALREADYREGISTRED(nick) "462 " + (nick) +  " :Connection already registered"
 # define ERR_CHANNELISFULL(nick, target) "471 "+ (nick) + " " + (target) + " :Cannot join channel (+l) -- Channel is full, try later"
