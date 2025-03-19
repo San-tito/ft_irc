@@ -72,7 +72,10 @@ static void	LoginUser(Client *client)
 	}
 	client->setRegistered(true);
 	Log::Info() << "User \"" << client->getNick() << "\" registered (connection " << client->getFd() << ").";
-	client->WriteErr(RPL_WELCOME(client->getNick(), client->getUser()));
+	client->WriteRpl(RPL_WELCOME(client->getNick(), client->getUser()));
+	client->WriteRpl(RPL_YOURHOST(client->getNick(), "*", "irc-0.0.1"));
+	client->WriteRpl(RPL_CREATED(client->getNick(), Server::getTime()));
+	client->WriteRpl(RPL_MYINFO(client->getNick(), "*", "irc-0.0.1", "iklot"));
 }
 
 void Cmd::Invite(Client *client, std::vector<std::string> params)
@@ -366,7 +369,7 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 	{
 		std::string topic(chan->getTopic());
 		if (topic.empty())
-			client->WriteErr(RPL_NOTOPIC(client->getNick(), chan->getName()));
+			client->WriteRpl(RPL_NOTOPIC(client->getNick(), chan->getName()));
 		else
 		{
 			// (*client) << TOPIC_MSG // QA I NEED HELP

@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/18 21:53:48 by tuta             ###   ########.fr       */
+/*   Updated: 2025/03/19 13:35:33 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,9 @@
 # include "Conn.hpp"
 # include "Log.hpp"
 # include "Membership.hpp"
+# include "Messages.hpp"
 # include "Parser.hpp"
 # include "Sig.hpp"
-# include "Messages.hpp"
 # include <algorithm>
 # include <arpa/inet.h>
 # include <cstring>
@@ -54,9 +54,11 @@ class Server
 	static std::vector<Client *> clients;
 	static std::vector<Channel *> channels;
 	static std::vector<Membership *> memberships;
+	static std::string getTime(void);
 
   private:
 	int sock_;
+	static time_t start_time;
 	unsigned short ParsePort(char *arg);
 	void NewConnection(int sock);
 	void ReadRequest(Client *client);

@@ -152,7 +152,8 @@ void Client::Mode(Client *client, std::vector<std::string> &params,
 	if (target != client)
 		return (client->WriteErr(ERR_USERSDONTMATCH(client->getNick())));
 	if (params.size() == 1)
-		return (client->Write(target->getNick() + (target->isRegistered() ? " registered" : " unregistered")));
+		return (client->Write(target->getNick()
+				+ (target->isRegistered() ? " registered" : " unregistered")));
 }
 
 void Client::Destroy(Client *client)
@@ -177,6 +178,11 @@ void Client::Write(const std::string &message)
 }
 
 void Client::WriteErr(const std::string &message)
+{
+	this->wbuffer_ += ": " + message + '\n';
+}
+
+void Client::WriteRpl(const std::string &message)
 {
 	this->wbuffer_ += ": " + message + '\n';
 }

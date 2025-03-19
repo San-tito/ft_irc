@@ -25,13 +25,6 @@ class Client
 	std::string getPassword(void) const;
 	std::string getReadBuffer(void) const;
 	std::string getWriteBuffer(void) const;
-	template <typename T> Client &operator<<(T const &value)
-	{
-		std::ostringstream newbuffer;
-		newbuffer << wbuffer_ << value;
-		wbuffer_ = newbuffer.str();
-		return (*this);
-	};
 	void setFd(int fd);
 	void setLastTime(time_t last_time);
 	void setRegistered(bool registered);
@@ -46,6 +39,7 @@ class Client
 	void unsetWriteBuffer(void);
 	void Write(const std::string &message);
 	void WriteErr(const std::string &message);
+	void WriteRpl(const std::string &message);
 	static void Exit(void);
 	static bool IsValidNick(const std::string &nick);
 	static Client *Search(const std::string &nick);

@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/18 00:13:28 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/19 13:35:45 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@ std::string Server::password;
 std::vector<Client *> Server::clients;
 std::vector<Channel *> Server::channels;
 std::vector<Membership *> Server::memberships;
+time_t Server::start_time(time(0));
 
 Server::Server(int argc, char **argv) : sock_(-1)
 {
@@ -47,6 +48,14 @@ Server::~Server(void)
 	Client::Exit();
 	Channel::Exit();
 	Membership::Exit();
+}
+
+std::string Server::getTime(void)
+{
+	char	time[64];
+
+	strftime(time, 64, "%a %b %d %Y at %H:%M:%S", localtime(&start_time));
+	return (std::string(time));
 }
 
 void Server::NewConnection(int sock)

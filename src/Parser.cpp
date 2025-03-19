@@ -9,7 +9,7 @@ void Parser::Request(Client *client, const std::string &request)
 	if (!Parse(request))
 	{
 		Log::Info() << "Connection " << client->getFd() << ": Parse error: prefix without command!?";
-		(*client) << "ERROR :Prefix without command\n";
+		client->Write("ERROR :Prefix without command\n");
 		return ;
 	}
 	if (!ValidateCommand(client))
@@ -93,7 +93,7 @@ bool Parser::ValidateCommand(Client *client)
 	if (Cmd::commands.find(command_) == Cmd::commands.end())
 	{
 		Log::Info() << "Connection " << client->getFd() << ": Unknown command: " << command_;
-		(*client) << command_ << " :Unknown command\n";
+		client->WriteErr(ERR_UNKNOWNCOMMAND(client->getNick(), command_));
 		return (false);
 	}
 	return (true);

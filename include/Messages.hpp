@@ -2,9 +2,9 @@
 # define MESSAGES_HPP
 
 # define RPL_WELCOME(nick, user) "001 " + (nick) + " :Welcome to the Internet Relay Network " + (nick) + "!" + (user)
-# define RPL_YOURHOST(servername, version) "002 :Your host is " + (servername) + ", running version " + (version)
-# define RPL_CREATED(date) "003 :This server was created " + (date)
-# define RPL_MYINFO(servername, version, channel_modes) "004 " + (servername) + " " + (version) + " " + (channel_modes)
+# define RPL_YOURHOST(nick, servername, version) "002 " + (nick) + " :Your host is " + (servername) + ", running version " + (version)
+# define RPL_CREATED(nick, date) "003 " + (nick) + " :This server was created " + (date)
+# define RPL_MYINFO(nick, servername, version, channel_modes) "004 " + (nick) + " " + (servername) + " " + (version) + " " + (channel_modes)
 
 # define RPL_NOTOPIC(nick, target) "331 " + (nick) + " " + (target) + " :No topic is set"
 
@@ -12,6 +12,7 @@
 # define ERR_NOSUCHCHANNEL(nick, target) "403 " + (nick) + " " + (target) + " :No such channel"
 # define ERR_NORECIPIENT(nick, target) "411 " + (nick) + " :No recipient given " + (target)
 # define ERR_NOTEXTTOSEND(nick) "412 " + (nick) + " :No text to send"
+# define ERR_UNKNOWNCOMMAND(nick, target) "421 " + (nick) + " " + (target) + " :Unknown command"
 # define ERR_NICKNAMETOOLONG(nick, target) "432 " + (nick) + " " + (target) + " :Nickname too long"
 # define ERR_ERRONEUSNICKNAME(nick, target) "432 " + (nick) + " " + (target) + " :Erroneous nickname"
 # define ERR_NICKNAMEINUSE(nick, target) "433 " + (nick) + " " + (target) + " :Nickname already in use"
