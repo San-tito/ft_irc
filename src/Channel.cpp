@@ -330,5 +330,7 @@ void Channel::Kick(Client *client, const std::string &nick,
 		return (client->WriteErr(ERR_CHANOPPRIVTOOLOW(client->getNick(),
 					channel)));
 	Membership::Remove(target, chan);
+	client->Write("KICK " + channel + " " + nick + " :" + reason);
+	chan->Write(client, "KICK " + channel + " " + nick + " :" + reason);
 	Log::Info() << "User " << nick << " was kicked from channel " << channel << " by " << client->getNick() << " (" << reason << ")\n";
 }
