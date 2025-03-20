@@ -14,6 +14,7 @@
 
 # define ERR_NOSUCHNICK(nick, channel) "401 " + (nick) + " " + (channel) + " :No such nick or channel name"
 # define ERR_NOSUCHCHANNEL(nick, target) "403 " + (nick) + " " + (target) + " :No such channel"
+# define ERR_CANNOTSENDTOCHAN(nick, target) "404 " + (nick) + " " + (target) + " :Cannot send to channel"
 # define ERR_NORECIPIENT(nick, target) "411 " + (nick) + " :No recipient given " + (target)
 # define ERR_NOTEXTTOSEND(nick) "412 " + (nick) + " :No text to send"
 # define ERR_UNKNOWNCOMMAND(nick, target) "421 " + (nick) + " " + (target) + " :Unknown command"

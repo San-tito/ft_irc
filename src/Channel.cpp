@@ -90,11 +90,14 @@ bool Channel::IsInvited(Client *client) const
 
 void Channel::Write(Client *client, const std::string &message)
 {
+	if (Membership::Get(client, this) == 0)
+		return (client->WriteErr(ERR_CANNOTSENDTOCHAN(client->getNick(),
+					name_)));
 	std::vector<Membership *>::iterator it(Server::memberships.begin());
 	while (it != Server::memberships.end())
 	{
 		if ((*it)->getChannel() == this && (*it)->getClient() != client)
-			(*it)->getClient()->Write(client->getPrefix(), message);
+			client->Write(client->getPrefix(), message);
 		++it;
 	}
 }
