@@ -97,7 +97,7 @@ void Channel::Write(Client *client, const std::string &message)
 	while (it != Server::memberships.end())
 	{
 		if ((*it)->getChannel() == this && (*it)->getClient() != client)
-			client->Write(client->getPrefix(), message);
+			(*it)->getClient()->Write(client->getPrefix(), message);
 		++it;
 	}
 }
