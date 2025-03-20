@@ -6,7 +6,7 @@
 /*   By: ncastell <ncastell@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/09/10 18:58:41 by sguzman           #+#    #+#             */
-/*   Updated: 2025/03/19 13:35:45 by sguzman          ###   ########.fr       */
+/*   Updated: 2025/03/20 17:12:51 by sguzman          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,9 +114,9 @@ void Server::ProcessRequest(Client *client)
 			Client::Destroy(client);
 			return ;
 		}
+		client->unsetReadBuffer();
 		Parser().Request(client, command);
 	}
-	client->unsetReadBuffer();
 }
 
 void Server::ProcessBuffers(void)
@@ -125,6 +125,9 @@ void Server::ProcessBuffers(void)
 	{
 		if (!clients[i]->getReadBuffer().empty())
 			ProcessRequest(clients[i]);
+	}
+	for (size_t i = 0; i < clients.size(); i++)
+	{
 		if (!clients[i]->getWriteBuffer().empty())
 			clients[i]->setEvents(POLLOUT);
 	}

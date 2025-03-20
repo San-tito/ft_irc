@@ -293,7 +293,7 @@ void Cmd::Privmsg(Client *client, std::vector<std::string> params)
 			dest = Client::Search(nick);
 		}
 		if (dest)
-			dest->Write("PRIVMSG " + target + " :" + params[1]);
+			dest->Write("PRIVMSG " + client->getNick() + " :" + params[1]);
 		else if ((chan = Channel::Search(target)))
 			chan->Write(client, "PRIVMSG " + target + " :" + params[1]);
 		else
