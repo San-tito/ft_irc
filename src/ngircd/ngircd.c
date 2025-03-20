@@ -74,7 +74,7 @@ GLOBAL int
 main(int argc, const char *argv[])
 {
 	bool ok, configtest = false;
-	bool NGIRCd_NoDaemon = false, NGIRCd_NoSyslog = false;
+	bool NGIRCd_NoDaemon = true, NGIRCd_NoSyslog = true;
 	int i;
 	size_t n;
 
@@ -87,10 +87,10 @@ main(int argc, const char *argv[])
 	umask(0077);
 
 	NGIRCd_SignalQuit = NGIRCd_SignalRestart = false;
-	NGIRCd_Passive = false;
-	NGIRCd_Debug = false;
+	NGIRCd_Passive = true;
+	NGIRCd_Debug = true;
 #ifdef SNIFFER
-	NGIRCd_Sniffer = false;
+	NGIRCd_Sniffer = true;
 #endif
 
 	Fill_Version();
