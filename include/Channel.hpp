@@ -16,7 +16,7 @@ class Channel
 	Channel(const std::string &name);
 	~Channel(void);
 	std::string getName(void) const;
-	std::set<char> getModes(void) const;
+	std::string getModes(void) const;
 	std::string getTopic(void) const;
 	std::string getKey(void) const;
 	size_t getMaxUsers(void) const;

@@ -14,9 +14,16 @@ std::string Channel::getName(void) const
 	return (name_);
 }
 
-std::set<char> Channel::getModes(void) const
+std::string Channel::getModes(void) const
 {
-	return (modes_);
+	std::string modes;
+	std::set<char>::const_iterator it(modes_.begin());
+	while (it != modes_.end())
+	{
+		modes += *it;
+		++it;
+	}
+	return (modes);
 }
 
 std::string Channel::getTopic(void) const
@@ -145,19 +152,16 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 		return (client->WriteErr(ERR_NOCHANMODES(client->getNick(),
 					target->getName())));
 	if (params.size() <= 1)
-	{
-		/* std::set<char> modes(target->getModes()); */
-		/* (*client) << target->getName() << " :Modes: "; */
-		/* for (std::set<char>::iterator it(modes.begin()); it != modes.end(); ++it) */
-		/* 	(*client) << *it; */
-		/* (*client) << "\n"; */
-		return ;
-	}
+		return (client->WriteRpl(RPL_CHANNELMODEIS(client->getNick(),
+					target->getName(), target->getModes())));
 	Membership *member(Membership::Get(client, target));
 	if (!member)
 		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(),
 					target->getName())));
+	long l(0);
 	bool is_op(member->HasMode('o'));
+	std::string the_modes("");
+	std::string the_args("");
 	for (size_t i = 1; i < params.size(); i++)
 	{
 		bool set(false);
@@ -177,14 +181,21 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 		}
 		switch (mode[0])
 		{
+		case 'o':
+			break ;
 		case 'i':
+			set ? target->AddMode('i') : target->DelMode('i');
+			the_modes += (set ? std::string("+") : std::string("-")) + "i";
+			break ;
 		case 't':
-			set ? target->AddMode(mode[0]) : target->DelMode(mode[0]);
+			set ? target->AddMode('t') : target->DelMode('t');
+			the_modes += (set ? std::string("+") : std::string("-")) + "t";
 			break ;
 		case 'k':
 			if (!set)
 			{
 				target->DelMode('k');
+				the_modes += "-k";
 				break ;
 			}
 			if (i + 1 >= params.size())
@@ -193,7 +204,7 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 				break ;
 			}
 			if (params[i + 1].empty() || params[i
-				+ 1].find(' ') == std::string::npos)
+				+ 1].find(' ') != std::string::npos)
 			{
 				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(),
 						target->getName(), "k"));
@@ -202,11 +213,15 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			target->DelMode('k');
 			target->setKey(params[i + 1]);
 			target->AddMode('k');
+			the_modes += "+k";
+			the_args = params[i + 1];
+			i++;
 			break ;
 		case 'l':
 			if (!set)
 			{
 				target->DelMode('l');
+				the_modes += "-l";
 				break ;
 			}
 			if (i + 1 >= params.size())
@@ -214,7 +229,7 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 				client->WriteErr(ERR_NEEDMOREPARAMS(client->getNick(), "MODE"));
 				break ;
 			}
-			long l(std::atol(params[i + 1].c_str()));
+			l = std::atol(params[i + 1].c_str());
 			if (l <= 0 || l >= 0xFFFF)
 			{
 				client->WriteErr(ERR_INVALIDMODEPARAM(client->getNick(),
@@ -224,8 +239,21 @@ void Channel::Mode(Client *client, std::vector<std::string> &params,
 			target->DelMode('l');
 			target->setMaxUsers(l);
 			target->AddMode('l');
+			the_modes += "+l";
+			the_args = params[i + 1];
+			i++;
+			break ;
+		default:
+			client->WriteErr(ERR_UNKNOWNMODE(client->getNick(), mode[0],
+					target->getName()));
 			break ;
 		}
+	}
+	if (!the_modes.empty())
+	{
+		client->Write("MODE " + target->getName() + " " + the_modes + the_args);
+		target->Write(client, "MODE " + target->getName() + " " + the_modes
+			+ the_args);
 	}
 }
 

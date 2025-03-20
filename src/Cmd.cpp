@@ -111,6 +111,7 @@ void Cmd::Invite(Client *client, std::vector<std::string> params)
 	}
 	Log::Info() << "User " << client->getNick() << " invites " << params[0] << " to " << params[1];
 	target->Write("INVITE " + params[0] + " " + params[1]);
+	target->WriteRpl(RPL_INVITING(target->getNick(), params[0], params[1]));
 }
 
 void Cmd::Join(Client *client, std::vector<std::string> params)
@@ -371,20 +372,17 @@ void Cmd::Topic(Client *client, std::vector<std::string> params)
 		if (topic.empty())
 			client->WriteRpl(RPL_NOTOPIC(client->getNick(), chan->getName()));
 		else
-		{
-			// (*client) << TOPIC_MSG // QA I NEED HELP
-		}
+			client->WriteRpl(RPL_TOPIC(client->getNick(), chan->getName(),
+					topic));
 		return ;
 	}
 	if (chan->HasMode('t') && !member->HasMode('o'))
 		return (client->WriteErr(ERR_CHANOPRIVSNEEDED(client->getNick(),
 					params[0])));
-	// if(params[1] != chan->getTopic())
-	// 	chan->Write(client, ":" + client->getNick() + " TOPIC "
-	// + chan->getName() + " :" + params[1] + '\n');
+	if (params[1] != chan->getTopic())
+		chan->Write(client, "TOPIC " + params[0] + " :" + params[1]);
 	chan->setTopic(params[1]);
-	// client->Write(":" + client->getNick() + " TOPIC "
-	// + chan->getName() + " :" + params[1] + '\n');
+	client->Write("TOPIC " + params[0] + " :" + params[1]);
 }
 
 void Cmd::User(Client *client, std::vector<std::string> params)

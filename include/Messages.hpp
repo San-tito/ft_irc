@@ -6,7 +6,11 @@
 # define RPL_CREATED(nick, date) "003 " + (nick) + " :This server was created " + (date)
 # define RPL_MYINFO(nick, servername, version, channel_modes) "004 " + (nick) + " " + (servername) + " " + (version) + " " + (channel_modes)
 
+# define RPL_UMODEIS(nick, modes) "221 " + (nick) + " +" + (modes)
+# define RPL_CHANNELMODEIS(nick, channel, modes) "324 " + (nick) + " " + (channel) + " +" + (modes)
 # define RPL_NOTOPIC(nick, target) "331 " + (nick) + " " + (target) + " :No topic is set"
+# define RPL_TOPIC(nick, channel, topic) "332 " + (nick) + " " + (channel) + " :" + (topic)
+# define RPL_INVITING(nick, target, channel) "341 " + (nick) + " " + (target) + " " + (channel)
 
 # define ERR_NOSUCHNICK(nick, channel) "401 " + (nick) + " " + (channel) + " :No such nick or channel name"
 # define ERR_NOSUCHCHANNEL(nick, target) "403 " + (nick) + " " + (target) + " :No such channel"
@@ -22,6 +26,7 @@
 # define ERR_NEEDMOREPARAMS(nick, target) "461 " + ((nick).empty() ? "*" : nick) + " " + (target) + " :Syntax error"
 # define ERR_ALREADYREGISTRED(nick) "462 " + (nick) + " :Connection already registered"
 # define ERR_CHANNELISFULL(nick, target) "471 " + (nick) + " " + (target) + " :Cannot join channel (+l) -- Channel is full, try later"
+# define ERR_UNKNOWNMODE(nick, target, param) "472 " + (nick) + " " + (param) + " :is unknown mode char for " + (target)
 # define ERR_INVITEONLYCHAN(nick, target) "473 " + (nick) + " " + (target) + " :Cannot join channel (+i) -- Invited users only"
 # define ERR_BADCHANNELKEY(nick, target) "475 " + (nick) + " " + (target) + " :Cannot join channel (+k) -- Wrong channel key"
 # define ERR_NOCHANMODES(nick, target) "477 " + (nick) + " " + (target) + " :Channel doesn't support modes"

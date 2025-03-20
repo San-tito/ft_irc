@@ -152,8 +152,7 @@ void Client::Mode(Client *client, std::vector<std::string> &params,
 	if (target != client)
 		return (client->WriteErr(ERR_USERSDONTMATCH(client->getNick())));
 	if (params.size() == 1)
-		return (client->Write(target->getNick()
-				+ (target->isRegistered() ? " registered" : " unregistered")));
+		return (client->Write(RPL_UMODEIS(client->getNick(), "")));
 }
 
 void Client::Destroy(Client *client)
