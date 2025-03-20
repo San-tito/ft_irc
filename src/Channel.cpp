@@ -260,6 +260,7 @@ void Channel::PartAll(Client *client)
 		{
 			Channel *channel((*it)->getChannel());
 			Part(client, channel->getName(), "");
+			continue ;
 		}
 		++it;
 	}
@@ -274,10 +275,10 @@ void Channel::Part(Client *client, const std::string &name,
 	Membership *membership(Membership::Get(client, channel));
 	if (membership == 0)
 		return (client->WriteErr(ERR_NOTONCHANNEL(client->getNick(), name)));
-	Membership::Remove(client, channel);
-	channel->Write(client, "PART " + channel->getName() + " :" + reason);
 	client->Write("PART " + name + " :" + reason);
+	channel->Write(client, "PART " + channel->getName() + " :" + reason);
 	Log::Info() << "User " << client->getNick() << " left channel " << name << " (" << reason << ")\n";
+	Membership::Remove(client, channel);
 }
 
 void Channel::Kick(Client *client, const std::string &nick,
